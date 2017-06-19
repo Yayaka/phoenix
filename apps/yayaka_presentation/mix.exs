@@ -37,6 +37,7 @@ defmodule YayakaPresentation.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    []
+    [{:ecto, "~> 2.1"},
+     {:yayaka, in_umbrella: true}]
   end
 end

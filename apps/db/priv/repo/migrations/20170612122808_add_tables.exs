@@ -2,34 +2,28 @@ defmodule DB.Repo.Migrations.AddTables do
   use Ecto.Migration
 
   def change do
-    # Common
+    # YMP
 
     create table(:host_informations, primary_key: false) do
       add :host, :string, primary_key: true
 
       add :ymp_version, :string
-      add :connection_protocols, :map
-      add :message_protocols, :map
+      add :connection_protocols, {:array, :map}
+      add :message_protocols, {:array, :map}
 
       timestamps
     end
 
-    create table(:services) do
-      add :host, :string
-      add :protocol, :string
-      add :service, :string
-
-      timestamps
-    end
-    create unique_index(:services, [:host, :protocol, :service])
+    # Yayaka
 
     create table(:users) do
-      add :host, :string
-      add :protocol, :string
+      add :identity, :string
+      add :user_id, :string
 
       timestamps
     end
-    create unique_index(:users, [:host, :protocol])
+    create unique_index(:users, [:identity, :user_id],
+                        name: :users_host_user_id_index)
 
     # Presentaion
 
@@ -39,21 +33,23 @@ defmodule DB.Repo.Migrations.AddTables do
 
       timestamps
     end
-    create unique_index(:provided_users, [:provider, :provided_id])
+    create unique_index(:provided_users, [:provider, :provided_id],
+                        name: :provided_user_provider_provided_id_index)
 
-    create table(:user_links, primary_key: false) do
-      add :provided_user_id,
-        references(:provided_users), primary_key: true
-      add :user_id, references(:users), primary_key: true
+    create table(:user_links) do
+      add :provided_user_id, references(:provided_users)
+      add :user_id, references(:users)
 
       timestamps
     end
+    create unique_index(:user_links, [:provided_user_id, :user_id],
+                        name: :user_links_unique_index)
 
     create table(:event_subscriptions, primary_key: false) do
-      add :id, :uuid, primary_key: true
+      add :id, :string, primary_key: true
 
       add :user_id, references(:users)
-      add :social_graph_id, references(:services)
+      add :social_graph, :string
 
       timestamps
     end
@@ -61,104 +57,141 @@ defmodule DB.Repo.Migrations.AddTables do
     # Identity
 
     create table(:identity_users, primary_key: false) do
-      add :id, :uuid, primary_key: true
+      add :id, :string, primary_key: true
 
-      add :sender_id, references(:services)
+      add :sender, :string
       timestamps
     end
 
-    create table(:user_attributes, primary_key: false) do
-      add :identity_user_id,
-        references(:identity_users, type: :uuid), primary_key: true
-      add :protocol, :string, primary_key: true
-      add :key, :string, primary_key: true
+    create table(:user_attributes) do
+      add :identity_user_id, references(:identity_users, type: :string)
+      add :protocol, :string
+      add :key, :string
       add :value, :map
 
-      add :sender_id, references(:services)
+      add :sender, :string
       timestamps
     end
+    create unique_index(:user_attributes, [:identity_user_id,
+                                           :protocol,
+                                           :key],
+                        name: :user_attributes_unique_index)
 
-    create table(:authorized_services, primary_key: false) do
-      add :identity_user_id,
-        references(:identity_users, type: :uuid), primary_key: true
-      add :service_id, references(:services), primary_key: true
+    create table(:authorized_services) do
+      add :identity_user_id, references(:identity_users, type: :string)
+      add :service, :string
 
-      add :sender_id, references(:services)
+      add :sender, :string
       timestamps
     end
+    create unique_index(:authorized_services, [:identity_user_id,
+                                               :service],
+                        name: :authorized_services_unique_index)
 
     # Repository
 
     create table(:events, primary_key: false) do
-      add :id, :uuid, primary_key: true
+      add :id, :string, primary_key: true
 
       add :user_id, references(:users)
       add :protocol, :string
       add :type, :string
+      add :payload, :map
+      add :deleted, :boolean, default: false
 
-      add :sender_id, references(:services)
+      add :sender, :string
       timestamps
     end
 
-    create table(:event_parameters, primary_key: false) do
-      add :event_id, references(:events, type: :uuid), primary_key: true
-      add :key, :string, primary_key: true
+    create table(:contents, primary_key: false) do
+      add :id, :string, primary_key: true
 
-      add :value, :map
-    end
+      add :user_id, references(:users)
+      add :protocol, :string
+      add :type, :string
+      add :payload, :map
+      add :deleted, :boolean, default: false
 
-    create table(:repository_subscribers, primary_key: false) do
-      add :user_id, references(:users), primary_key: true
-      add :social_graph_id, references(:services), primary_key: true
-
-      add :sender_id, references(:services)
+      add :sender, :string
       timestamps
     end
+
+    create table(:repository_subscribers) do
+      add :user_id, references(:users)
+      add :social_graph, :string
+
+      add :sender, :string
+      timestamps
+    end
+    create unique_index(:repository_subscribers, [:user_id, :social_graph],
+                        name: :repository_subscribers_unique_index)
 
     # Social graph
 
-    create table(:repository_subscriptions, primary_key: false) do
-      add :user_id, references(:users), primary_key: true
-      add :repository_id, references(:services), primary_key: true
+    create table(:repository_subscriptions) do
+      add :user_id, references(:users)
+      add :repository, :string
 
-      add :sender_id, references(:services)
+      add :sender, :string
       timestamps
     end
+    create unique_index(:repository_subscriptions, [:user_id, :repository],
+                        name: :repository_subscriptions_unique_index)
 
-    create table(:social_graph_subscriptions, primary_key: false) do
-      add :user_id, references(:users), primary_key: true
-      add :social_graph_id, references(:services), primary_key: true
+    create table(:social_graph_subscriptions) do
+      add :user_id, references(:users)
+      add :target_user_id, references(:users)
+      add :social_graph, :string
 
-      add :sender_id, references(:services)
+      add :sender, :string
       timestamps
     end
+    create unique_index(:social_graph_subscriptions, [:user_id, :target_user_id, :social_graph],
+                        name: :social_graph_subscriptions_unique_index)
 
-    create table(:social_graph_subscribers, primary_key: false) do
-      add :user_id, references(:users), primary_key: true
-      add :social_graph_id, references(:services), primary_key: true
+    create table(:social_graph_subscribers) do
+      add :user_id, references(:users)
+      add :target_user_id, references(:users)
+      add :social_graph, :string
 
-      add :sender_id, references(:services)
+      add :sender, :string
       timestamps
     end
+    create unique_index(:social_graph_subscribers, [:user_id, :target_user_id, :social_graph],
+                        name: :social_graph_subscribers_unique_index)
 
     create table(:event_subscribers, primary_key: false) do
-      add :id, :uuid, primary_key: true
+      add :id, :string, primary_key: true
 
-      add :service_id, references(:services)
+      add :presentation, :string
 
-      add :sender_id, references(:services)
+      add :sender, :string
       timestamps
     end
 
     create table(:event_subscriber_matchers) do
-      add :event_subscriber_id, references(:event_subscribers, type: :uuid)
-      add :types, {:array, :map}
+      add :event_subscriber_id, references(:event_subscribers,
+                                           type: :string,
+                                           on_delete: :delete_all)
     end
 
-    create table(:event_subscriber_matcher_users) do
-      add :event_subscriber_matcher_id,
-        references(:event_subscriber_matchers), primary_key: true
-      add :user_id, references(:users), primary_key: true
+    create table(:event_subscriber_matcher_types) do
+      add :event_subscriber_matcher_id, references(:event_subscriber_matchers,
+                                                   on_delete: :delete_all)
+      add :protocol, :string
+      add :type, :string
     end
+    create unique_index(:event_subscriber_matcher_types,
+                        [:event_subscriber_matcher_id, :protocol, :type],
+                        name: :event_subscriber_matcher_types_index)
+
+    create table(:event_subscriber_matcher_users) do
+      add :event_subscriber_matcher_id, references(:event_subscriber_matchers,
+                                                   on_delete: :delete_all)
+      add :user_id, references(:users)
+    end
+    create unique_index(:event_subscriber_matcher_users,
+                        [:event_subscriber_matcher_id, :user_id],
+                        name: :event_subscriber_matcher_users_index)
   end
 end
