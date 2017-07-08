@@ -3,6 +3,8 @@ defmodule YMP.Application do
   # for more information on OTP Applications
   @moduledoc false
 
+  @workers Application.get_env(:ymp, :workers)
+
   use Application
 
   def start(_type, _args) do
@@ -10,8 +12,9 @@ defmodule YMP.Application do
 
     # Define workers and child supervisors to be supervised
     children = [
-      # Starts a worker by calling: YMP.Worker.start_link(arg1, arg2, arg3)
-      # worker(YMP.Worker, [arg1, arg2, arg3]),
+      worker(Registry, [:unique, YMP.HTTPSTokenConnection]),
+      Honeydew.queue_spec(:http),
+      Honeydew.worker_spec(:http, YMP.HTTP, num: @workers[:http] || 1)
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html

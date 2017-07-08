@@ -19,7 +19,8 @@ defmodule YMP.Mixfile do
   # Type "mix help compile.app" for more information
   def application do
     # Specify extra applications you'll use from Erlang/Elixir
-    [extra_applications: [:logger],
+    [applications: [:httpoison],
+     extra_applications: [:logger],
      mod: {YMP.Application, []}]
   end
 
@@ -37,6 +38,12 @@ defmodule YMP.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    [{:ecto, "~> 2.1"}]
+    [{:ecto, "~> 2.1"},
+     {:bypass, "~> 0.7", only: :test},
+     {:guardian, "~> 0.14"},
+     {:poison, "~> 3.1"},
+     {:honeydew, "~> 1.0.0-rc7"},
+     {:httpoison, "~> 0.12"},
+     {:secure_random, "~> 0.5"}]
   end
 end

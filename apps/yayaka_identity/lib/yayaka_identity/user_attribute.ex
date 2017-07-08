@@ -2,7 +2,7 @@ defmodule YayakaIdentity.UserAttribute do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @user_attribute_types Application.get_env(:yayaka, :user_attribute_types)
+  @user_attributes Application.get_env(:yayaka, :user_attributes)
 
   schema "user_attributes" do
     belongs_to :identity_user, YayakaIdentity.IdentityUser
@@ -23,7 +23,7 @@ defmodule YayakaIdentity.UserAttribute do
                 |> unique_constraint(:key, name: :user_attributes_unique_index)
     validate_change(changeset, :key, fn :key, type ->
       protocol = get_change(changeset, :protocol)
-      case Map.get(@user_attribute_types, protocol) do
+      case Map.get(@user_attributes, protocol) do
         types when not is_nil(types) ->
           if type in types do
             [] # No errors

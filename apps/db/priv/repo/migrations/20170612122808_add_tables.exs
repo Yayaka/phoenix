@@ -9,7 +9,7 @@ defmodule DB.Repo.Migrations.AddTables do
 
       add :ymp_version, :string
       add :connection_protocols, {:array, :map}
-      add :message_protocols, {:array, :map}
+      add :service_protocols, {:array, :map}
 
       timestamps
     end

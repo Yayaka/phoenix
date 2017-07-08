@@ -9,8 +9,8 @@ defmodule YayakaRepository.EventTest do
       id: "id1",
       user_id: 0,
       protocol: "yayaka",
-      type: "delete-event",
-      payload: %{id: "id0"},
+      type: "delete-content",
+      payload: %{"content-id": "id0"},
       sender: sender
     }
     changeset = Event.changeset(%Event{}, params)
@@ -18,8 +18,8 @@ defmodule YayakaRepository.EventTest do
     assert get_change(changeset, :id) == "id1"
     assert get_change(changeset, :user_id) == 0
     assert get_change(changeset, :protocol) == "yayaka"
-    assert get_change(changeset, :type) == "delete-event"
-    assert get_change(changeset, :payload).id == "id0"
+    assert get_change(changeset, :type) == "delete-content"
+    assert get_change(changeset, :payload)."content-id" == "id0"
     assert get_change(changeset, :sender) == sender
   end
 

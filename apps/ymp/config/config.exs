@@ -2,29 +2,19 @@
 # and its dependencies with the aid of the Mix.Config module.
 use Mix.Config
 
-# This configuration is loaded before any dependency and is restricted
-# to this project. If another project depends on this project, this
-# file won't be loaded nor affect the parent project. For this reason,
-# if you want to provide default values for your application for
-# 3rd-party users, it should be done in your "mix.exs" file.
+config :ymp,
+  connection_protocols: [
+    {"https-token", module: YMP.HTTPSTokenConnection}]
 
-# You can configure for your application as:
-#
-#     config :ymp, key: :value
-#
-# And access this configuration in your application as:
-#
-#     Application.get_env(:ymp, :key)
-#
-# Or configure a 3rd-party app:
-#
-#     config :logger, level: :info
-#
+config :ymp, :workers,
+  http: 10
 
-# It is also possible to import configuration files, relative to this
-# directory. For example, you can emulate configuration per environment
-# by uncommenting the line below and defining dev.exs, test.exs and such.
-# Configuration from the imported file will override the ones defined
-# here (which is why it is important to import them last).
-#
-#     import_config "#{Mix.env}.exs"
+config :guardian, Guardian,
+  allowed_algos: ["HS512"],
+  verify_module: Guardian.JWT,
+  issuer: "YMP",
+  ttl: { 30, :days },
+  allowed_drift: 2000,
+  verify_issuer: true,
+  secret_key: System.get_env("GUARDIAN_SECRET_KEY") || "abcd",
+  serializer: YMP.GuardianSerializer

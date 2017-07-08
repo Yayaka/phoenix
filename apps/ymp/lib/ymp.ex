@@ -1,18 +1,12 @@
 defmodule YMP do
-  @moduledoc """
-  Documentation for YMP.
-  """
+  @host Application.get_env(:web, Web.Endpoint)[:url][:host]
+  @port Application.get_env(:web, Web.Endpoint)[:http][:port]
 
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> YMP.hello
-      :world
-
-  """
-  def hello do
-    :world
+  def get_host do
+    if is_nil(@port) do
+      @host
+    else
+      "#{@host}:#{@port}"
+    end
   end
 end

@@ -7,8 +7,8 @@ defmodule YayakaIdentity.IdentityUserTest do
     sender = %{host: "host1", service: :presentation}
     attribute1 = %{protocol: "yayaka", key: "name",
       value: %{name: "name1"}, sender: sender}
-    attribute2 = %{protocol: "yayaka", key: "bio",
-      value: %{bio: "bio1"}, sender: sender}
+    attribute2 = %{protocol: "yayaka", key: "biography",
+      value: %{text: "biography1"}, sender: sender}
     params = %{
       id: "user1",
       user_attributes: [attribute1, attribute2],

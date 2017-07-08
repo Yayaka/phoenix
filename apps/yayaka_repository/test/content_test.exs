@@ -9,7 +9,7 @@ defmodule YayakaRepository.ContentTest do
       id: "id1",
       user_id: 0,
       protocol: "yayaka",
-      type: "text",
+      type: "plaintext",
       payload: %{body: "text"},
       sender: sender
     }
@@ -18,7 +18,7 @@ defmodule YayakaRepository.ContentTest do
     assert get_change(changeset, :id) == "id1"
     assert get_change(changeset, :user_id) == 0
     assert get_change(changeset, :protocol) == "yayaka"
-    assert get_change(changeset, :type) == "text"
+    assert get_change(changeset, :type) == "plaintext"
     assert get_change(changeset, :payload).body == "text"
     assert get_change(changeset, :sender) == sender
   end
