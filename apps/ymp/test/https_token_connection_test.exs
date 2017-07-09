@@ -91,6 +91,23 @@ defmodule YMP.HTTPSTokenConnectionTest do
     refute YMP.HTTPSTokenConnection.validate(invalid)
   end
 
+  test "check_expired", %{info: info} do
+    token = "aaaa"
+    now = DateTime.utc_now() |> DateTime.to_unix()
+    not_expired = %YMP.HTTPSTokenConnection{
+      host_information: info,
+      token: token,
+      expires: now + 1000
+    }
+    expired = %YMP.HTTPSTokenConnection{
+      host_information: info,
+      token: token,
+      expires: now - 1000
+    }
+    assert YMP.HTTPSTokenConnection.check_expired(expired)
+    refute YMP.HTTPSTokenConnection.check_expired(not_expired)
+  end
+
   test "send_packet", %{bypass: bypass, info: info} do
     token = "aaaa"
     sender_host = YMP.get_host()

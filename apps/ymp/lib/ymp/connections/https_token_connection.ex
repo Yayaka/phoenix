@@ -12,8 +12,15 @@ defmodule YMP.HTTPSTokenConnection do
   end
 
   # @impl YMP.Connection TODO Elixir v1.5
-  def validate(struct) do
-    parameters = struct.parameters
+  def check_expired(connection) do
+    expires = connection.expires
+    now = DateTime.utc_now() |> DateTime.to_unix()
+    expires <= now
+  end
+
+  # @impl YMP.Connection TODO Elixir v1.5
+  def validate(connection_protocol) do
+    parameters = connection_protocol.parameters
     request_path = Map.get(parameters, "request-path")
     grant_path = Map.get(parameters, "grant-path")
     packet_path = Map.get(parameters, "packet-path")

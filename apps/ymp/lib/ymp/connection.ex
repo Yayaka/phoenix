@@ -12,9 +12,13 @@ defmodule YMP.Connection do
   """
   @callback send_packet(connection :: struct, messages :: list(any)) :: :ok | :error
   @doc """
-  Validate the connection protocol.
+  Validates the connection protocol.
   """
   @callback validate(%YMP.HostInformation.ConnectionProtocol{}) :: boolean
+  @doc """
+  Checks whether the connection is expired or not.
+  """
+  @callback check_expired(connection :: struct) :: true | false
 
   def get_common_connection_protocol(host_information) do
     case get_common_connection_protocols(host_information) do
