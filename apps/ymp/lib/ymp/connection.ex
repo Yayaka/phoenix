@@ -37,4 +37,8 @@ defmodule YMP.Connection do
   def check_expired(connection) do
     apply(connection.__struct__, :check_expired, [connection])
   end
+
+  def send_packet(connection, messages) do
+    apply(connection.__struct__, :send_packet, [connection, messages])
+  end
 end

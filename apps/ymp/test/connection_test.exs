@@ -44,7 +44,7 @@ defmodule YMP.ConnectionTest do
     @behaviour YMP.Connection
     defstruct []
     def connect(_host_information), do: {:ok, %__MODULE__{}}
-    def send_packet(_connection, _messages), do: :error
+    def send_packet(_connection, _messages), do: :ok
     def validate(%YMP.HostInformation.ConnectionProtocol{}), do: true
     def check_expired(_connection), do: true
   end
@@ -60,5 +60,10 @@ defmodule YMP.ConnectionTest do
   test "check_expired" do
     assert YMP.Connection.check_expired(%A{})
     refute YMP.Connection.check_expired(%B{})
+  end
+
+  test "send_packet" do
+    assert :ok == YMP.Connection.send_packet(%A{}, [])
+    assert :error == YMP.Connection.send_packet(%B{}, [])
   end
 end
