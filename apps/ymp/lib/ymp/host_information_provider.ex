@@ -1,5 +1,5 @@
 defmodule YMP.HostInformationProvider do
-  def get(host) do
+  def request(host) do
     case DB.Repo.get_by(YMP.HostInformation, host: host) do
       nil ->
         url = "http://#{host}/.well-known/ymp"

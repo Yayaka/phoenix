@@ -96,7 +96,7 @@ defmodule YMP.HTTPSTokenConnection do
   def handle_request(map) do
     %{"host" => host, "state" => state} = map
     {:ok, host_information} =
-      YMP.HostInformationProvider.get(host)
+      YMP.HostInformationProvider.request(host)
     https_token = host_information.connection_protocols
                   |> Enum.find(fn struct ->
                     struct.name == "https-token"

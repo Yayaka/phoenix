@@ -23,7 +23,7 @@ defmodule YMP.HostInformationProviderTest do
     }
     changeset = YMP.HostInformation.changeset(%YMP.HostInformation{}, params)
     DB.Repo.insert(changeset)
-    {:ok, host_information} = YMP.HostInformationProvider.get(params.host)
+    {:ok, host_information} = YMP.HostInformationProvider.request(params.host)
     assert host_information.host == params.host
     assert host_information.ymp_version == "0.1.0"
     assert length(host_information.connection_protocols) == 1
@@ -52,9 +52,9 @@ defmodule YMP.HostInformationProviderTest do
       |> Plug.Conn.resp(200, body)
     end
     host = "localhost:#{bypass.port}"
-    {:ok, host_information} = YMP.HostInformationProvider.get(host)
+    {:ok, host_information} = YMP.HostInformationProvider.request(host)
     # Cached to DB
-    {:ok, ^host_information} = YMP.HostInformationProvider.get(host)
+    {:ok, ^host_information} = YMP.HostInformationProvider.request(host)
     assert host_information.host == host
     assert host_information.ymp_version == "0.1.0"
     assert length(host_information.connection_protocols) == 1
