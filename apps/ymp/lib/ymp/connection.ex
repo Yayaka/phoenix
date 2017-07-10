@@ -6,7 +6,7 @@ defmodule YMP.Connection do
 
   Returns a connection struct.
   """
-  @callback connect(host :: %YMP.HostInformation{}) :: {:ok, struct} | :error
+  @callback connect(host :: %YMP.HostInformation{}) :: {:ok, struct} | {:error, any}
   @doc """
   Sends a packet by using the given connection.
   """
@@ -23,14 +23,18 @@ defmodule YMP.Connection do
   def get_common_connection_protocol(host_information) do
     case get_common_connection_protocols(host_information) do
       [] -> :error
-      [head | _] -> {:ok, head}
+      [head | _] -> {:ok, head} # TODO Prioritization
     end
   end
 
-  def get_common_connection_protocols(host_information) do
+  defp get_common_connection_protocols(host_information) do
     host_information.connection_protocols
     |> Enum.filter(fn %{name: name} ->
-      List.keymember?(@connection_protocols, name, 0)
+      Map.has_key?(@connection_protocols, name)
     end)
+  end
+
+  def check_expired(connection) do
+    apply(connection.__struct__, :check_expired, [connection])
   end
 end

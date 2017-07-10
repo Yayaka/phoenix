@@ -61,13 +61,12 @@ defmodule YMP.HTTPSTokenConnection do
           expires: expires}}
     after
       @timeout ->
-        :timeout
+        {:error, "timeout"}
     end
   end
 
   # @impl YMP.Connection TODO Elixir v1.5 
   def send_packet(connection, messages) do
-    sender_host = YMP.get_host()
     host = connection.host_information.host
     token = connection.token
     https_token = connection.host_information.connection_protocols

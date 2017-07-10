@@ -23,12 +23,10 @@ defmodule YMP.ConnectionTest do
       host: "localhost",
       ymp_version: "0.1.0",
       connection_protocols: [
-        %{name: "https-token",
+        %{name: "test",
           version: "0.1.100",
           parameters: %{
-            "request-path" => "/request",
-            "grant-path" => "/grant",
-            "packet-path" => "/packet"
+            "test" => true
           }
         }
       ]
@@ -37,8 +35,30 @@ defmodule YMP.ConnectionTest do
     struct = Ecto.Changeset.apply_changes(changeset)
     result = YMP.Connection.get_common_connection_protocol(struct)
     assert elem(result, 0) == :ok
-    assert elem(result, 1).name == "https-token"
+    assert elem(result, 1).name == "test"
     assert elem(result, 1).version == "0.1.100"
-    assert elem(result, 1).parameters |> map_size == 3
+    assert elem(result, 1).parameters |> map_size == 1
+  end
+
+  defmodule A do
+    @behaviour YMP.Connection
+    defstruct []
+    def connect(_host_information), do: {:ok, %__MODULE__{}}
+    def send_packet(_connection, _messages), do: :error
+    def validate(%YMP.HostInformation.ConnectionProtocol{}), do: true
+    def check_expired(_connection), do: true
+  end
+  defmodule B do
+    @behaviour YMP.Connection
+    defstruct []
+    def connect(_host_information), do: {:ok, %__MODULE__{}}
+    def send_packet(_connection, _messages), do: :error
+    def validate(%YMP.HostInformation.ConnectionProtocol{}), do: true
+    def check_expired(_connection), do: false
+  end
+
+  test "check_expired" do
+    assert YMP.Connection.check_expired(%A{})
+    refute YMP.Connection.check_expired(%B{})
   end
 end

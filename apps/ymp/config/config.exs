@@ -2,9 +2,15 @@
 # and its dependencies with the aid of the Mix.Config module.
 use Mix.Config
 
-config :ymp,
-  connection_protocols: [
-    {"https-token", module: YMP.HTTPSTokenConnection}]
+config :ymp, :connection_protocols, %{
+  "https-token" => %{module: YMP.HTTPSTokenConnection}}
+
+if Mix.env == :test do
+  config :ymp, :connection_protocols, %{
+    "test" => %{module: YMP.ConnectionTest},
+    "test-a" => %{module: YMP.ConnectionProviderTest.A},
+    "test-b" => %{module: YMP.ConnectionProviderTest.B}}
+end
 
 config :ymp, :workers,
   http: 10

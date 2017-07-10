@@ -7,7 +7,8 @@ defmodule YMP.HTTPSTokenConnectionTest do
       host: "localhost:#{bypass.port}",
       ymp_version: "0.1.0",
       connection_protocols: [
-        %{name: "https-token",
+        %YMP.HostInformation.ConnectionProtocol{
+          name: "https-token",
           version: "0.1.0",
           parameters: %{
             "request-path" => "/request",
@@ -64,7 +65,7 @@ defmodule YMP.HTTPSTokenConnectionTest do
       |> Plug.Conn.resp(204, "")
     end
 
-    assert :timeout == YMP.HTTPSTokenConnection.connect(info)
+    assert {:error, "timeout"} == YMP.HTTPSTokenConnection.connect(info)
   end
 
   test "validate" do

@@ -44,6 +44,7 @@ defmodule YMP.Mixfile do
      {:poison, "~> 3.1"},
      {:honeydew, "~> 1.0.0-rc7"},
      {:httpoison, "~> 0.12"},
-     {:secure_random, "~> 0.5"}]
+     {:secure_random, "~> 0.5"},
+     {:uuid, "~> 1.1"}]
   end
 end
