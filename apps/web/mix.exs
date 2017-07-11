@@ -21,6 +21,7 @@ defmodule Web.Mixfile do
   # Type `mix help compile.app` for more information.
   def application do
     [mod: {Web.Application, []},
+     applications: [:db],
      extra_applications: [:logger, :runtime_tools]]
   end
 
@@ -32,7 +33,8 @@ defmodule Web.Mixfile do
   #
   # Type `mix help deps` for examples and options.
   defp deps do
-    [{:phoenix, "~> 1.3.0-rc"},
+    [{:db, in_umbrella: true},
+     {:phoenix, "~> 1.3.0-rc"},
      {:phoenix_pubsub, "~> 1.0"},
      {:phoenix_ecto, "~> 3.2"},
      {:phoenix_html, "~> 2.6"},

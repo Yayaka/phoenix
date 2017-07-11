@@ -13,7 +13,8 @@ defmodule YMP.Application do
     # Define workers and child supervisors to be supervised
     children = [
       worker(YMP.ConnectionProvider, []),
-      worker(Registry, [:unique, YMP.HTTPSTokenConnection]),
+      worker(Registry, [:unique, YMP.HTTPSTokenConnection], id: YMP.HTTPSTokenConnection),
+      worker(Registry, [:unique, YMP.MessageGateway], id: YMP.MessageGateway),
       Honeydew.queue_spec(:http),
       Honeydew.worker_spec(:http, YMP.HTTP, num: @workers[:http] || 1)
     ]
