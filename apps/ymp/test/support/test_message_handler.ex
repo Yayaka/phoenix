@@ -14,7 +14,6 @@ defmodule YMP.TestMessageHandler do
         send pid, message
       end
     end)
-    Registry.unregister(__MODULE__, action)
     :ok
   end
 end

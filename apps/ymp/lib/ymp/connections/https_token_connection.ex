@@ -130,7 +130,18 @@ defmodule YMP.HTTPSTokenConnection do
     end
   end
 
-  def handle_packet(map) do
-    # TODO
+  def handle_packet(resource, packet) do
+    myhost = YMP.get_host()
+    with %{host: host} <- resource,
+         %{"messages" => messages} <- packet do
+      for message <- messages do
+        if message["host"] == myhost and message["sender"]["host"] == host do
+          YMP.MessageGateway.push(message)
+        end
+      end
+      :ok
+    else
+      _ -> :error
+    end
   end
 end

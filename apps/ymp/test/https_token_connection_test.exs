@@ -1,6 +1,11 @@
 defmodule YMP.HTTPSTokenConnectionTest do
   use DB.DataCase
 
+  setup_all do
+    YMP.TestMessageHandler.start_link()
+    :ok
+  end
+
   setup do
     bypass = Bypass.open
     host_information = %YMP.HostInformation{
@@ -134,8 +139,7 @@ defmodule YMP.HTTPSTokenConnectionTest do
     messages = [%{"sender" => %{
                   "host" => sender_host,
                   "protocol" => "protocol1",
-                  "service" => "service1"
-                },
+                  "service" => "service1"},
                 "id" => "a",
                 "host" => connection.host_information.host,
                 "protocol" => "protocol2",
@@ -166,5 +170,38 @@ defmodule YMP.HTTPSTokenConnectionTest do
     map = %{"host" => info.host,
       "state" => state}
     assert :ok == YMP.HTTPSTokenConnection.handle_request(map)
+  end
+
+  test "handle_packet" do
+    action = "ymp-https-token-connection-test-handle-packet"
+    YMP.TestMessageHandler.register(action)
+    host = YMP.get_host()
+    message1 = %{"sender" => %{
+      "host" => "host1",
+      "protocol" => "protocol1",
+      "service" => "service1"},
+    "id" => "a",
+    "host" => host,
+    "protocol" => "test",
+    "service" => "service2",
+    "action" => action,
+    "payload" => %{
+      "text" => "text1"
+    }}
+    message2 = message1
+               |> put_in(["sender", "host"], "host2")
+    message3 = message1
+               |> put_in(["host"], "host1")
+    message4 = message1
+               |> put_in(["sender", "host"], "host2")
+               |> put_in(["host"], "host1")
+    packet = %{
+      "messages" => [message1, message2, message3, message4]
+    }
+    YMP.HTTPSTokenConnection.handle_packet(%{host: "host1"}, packet)
+    assert_receive message1
+    refute_receive message2
+    refute_receive message3
+    refute_receive message4
   end
 end
