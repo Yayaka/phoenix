@@ -25,4 +25,11 @@ defmodule YMP.HostInformationProvider do
       host_information -> {:ok, host_information}
     end
   end
+
+  def clear_old_caches(older_than) do
+    import Ecto.Query
+    query = from info in YMP.HostInformation,
+      where: info.updated_at < ^older_than
+    DB.Repo.delete_all(query)
+  end
 end

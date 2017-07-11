@@ -60,4 +60,40 @@ defmodule YMP.HostInformationProviderTest do
     assert length(host_information.connection_protocols) == 1
     assert length(host_information.service_protocols) == 0
   end
+
+  test "clear_old_caches" do
+    now = DateTime.utc_now() |> DateTime.to_unix()
+    to_naive = fn unix ->
+      {:ok, datetime} = DateTime.from_unix(unix)
+      DateTime.to_naive(datetime)
+    end
+    info1 = %YMP.HostInformation{
+      host: "host1",
+      ymp_version: "0.1.0",
+      updated_at: to_naive.(now - 2000)
+    }
+    info2 = %YMP.HostInformation{
+      info1 | host: "host2",
+      updated_at: to_naive.(now - 1000)
+    }
+    info3 = %YMP.HostInformation{
+      info1 | host: "host3",
+      updated_at: to_naive.(now)
+    }
+    info4 = %YMP.HostInformation{
+      info1 | host: "host4",
+      updated_at: to_naive.(now + 1000)
+    }
+    DB.Repo.insert(info1)
+    DB.Repo.insert(info2)
+    DB.Repo.insert(info3)
+    DB.Repo.insert(info4)
+    list = DB.Repo.all(YMP.HostInformation)
+    assert list |> length == 4
+    YMP.HostInformationProvider.clear_old_caches(to_naive.(now))
+    list = DB.Repo.all(YMP.HostInformation)
+    assert list |> length == 2
+    assert Enum.any?(list, fn %{host: host} -> host == info3.host end)
+    assert Enum.any?(list, fn %{host: host} -> host == info4.host end)
+  end
 end
