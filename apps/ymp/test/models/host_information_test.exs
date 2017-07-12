@@ -1,5 +1,5 @@
 defmodule YMP.HostInformationTest do
-  use ExUnit.Case
+  use DB.DataCase
   import Ecto.Changeset
 
   test "valid changeset" do
@@ -35,6 +35,7 @@ defmodule YMP.HostInformationTest do
     assert get_change(service_protocol, :version) == "1.0.0"
     assert get_change(service_protocol, :services) == ["presentation"]
     assert get_change(service_protocol, :parameters) == %{}
+    assert match? {:ok, _}, DB.Repo.insert(changeset)
   end
 
   test "invalid changeset" do

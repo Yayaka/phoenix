@@ -14,7 +14,7 @@ defmodule Yayaka.User do
     user
     |> cast(params, @fields)
     |> validate_required(@fields)
-    |> unique_constraint(:id, name: :users_host_user_id_index)
+    |> unique_constraint(:user_id, name: :users_host_user_id_index)
     |> Yayaka.Service.validate_service(:identity, :identity)
   end
 end

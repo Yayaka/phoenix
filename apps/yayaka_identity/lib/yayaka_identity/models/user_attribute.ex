@@ -5,7 +5,7 @@ defmodule YayakaIdentity.UserAttribute do
   @user_attributes Application.get_env(:yayaka, :user_attributes)
 
   schema "user_attributes" do
-    belongs_to :identity_user, YayakaIdentity.IdentityUser
+    belongs_to :identity_user, YayakaIdentity.IdentityUser, type: :string
     field :protocol, :string
     field :key, :string
     field :value, :map

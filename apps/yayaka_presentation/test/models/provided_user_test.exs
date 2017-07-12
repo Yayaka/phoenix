@@ -1,5 +1,5 @@
 defmodule YayakaPresentation.ProvidedUserTest do
-  use ExUnit.Case
+  use DB.DataCase
   import Ecto.Changeset
   alias YayakaPresentation.ProvidedUser
 
@@ -12,6 +12,7 @@ defmodule YayakaPresentation.ProvidedUserTest do
     assert changeset.valid?
     assert get_change(changeset, :provider) == "provider1"
     assert get_change(changeset, :provided_id) == "id1"
+    assert match? {:ok, _}, DB.Repo.insert(changeset)
   end
 
   test "invalid changeset" do

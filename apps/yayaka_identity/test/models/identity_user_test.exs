@@ -1,5 +1,5 @@
 defmodule YayakaIdentity.IdentityUserTest do
-  use ExUnit.Case
+  use DB.DataCase
   import Ecto.Changeset
   alias YayakaIdentity.IdentityUser
 
@@ -25,6 +25,7 @@ defmodule YayakaIdentity.IdentityUserTest do
     assert get_change(attribute, :key) == "name"
     assert get_change(attribute, :value).name == "name1"
     assert get_change(attribute, :sender) == sender
+    assert match? {:ok, _}, DB.Repo.insert(changeset)
   end
 
   test "invalid changeset" do

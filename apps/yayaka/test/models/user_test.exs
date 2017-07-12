@@ -1,5 +1,5 @@
 defmodule Yayaka.UserTest do
-  use ExUnit.Case
+  use DB.DataCase
 
   test "valid changeset" do
     user1 = %{
@@ -10,6 +10,7 @@ defmodule Yayaka.UserTest do
     assert changeset.valid?
     assert Ecto.Changeset.get_change(changeset, :identity).service == :identity
     assert Ecto.Changeset.get_change(changeset, :user_id) == "user1"
+    assert match? {:ok, _}, DB.Repo.insert(changeset)
   end
 
   test "invalid changeset" do
