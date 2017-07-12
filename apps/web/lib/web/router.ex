@@ -13,14 +13,26 @@ defmodule Web.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :api_auth do
+    plug Guardian.Plug.VerifyHeader, realm: "Bearer"
+    plug Guardian.Plug.LoadResource
+  end
+
   scope "/", Web do
-    pipe_through :browser # Use the default browser stack
+    pipe_through :browser
 
     get "/", PageController, :index
   end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", Web do
-  #   pipe_through :api
-  # end
+  scope "/api", Web do
+    pipe_through [:api, :api_auth]
+
+    scope "/ymp" do
+      scope "/https-token" do
+        post "/request", HTTPSTokenController, :request
+        post "/grant", HTTPSTokenController, :grant
+        post "/packet", HTTPSTokenController, :packet
+      end
+    end
+  end
 end

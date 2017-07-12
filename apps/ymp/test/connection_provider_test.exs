@@ -98,7 +98,7 @@ defmodule YMP.ConnectionProviderTest do
 
   test "delete" do
     {:ok, connection1} = __MODULE__.A.connect(:ok)
-    {:ok, connection2} = __MODULE__.A.connect(:ok)
+    {:ok, _connection2} = __MODULE__.A.connect(:ok)
     YMP.ConnectionProvider.put(@host_a1.host, connection1)
     YMP.ConnectionProvider.put(@host_a2.host, connection1)
     state = :sys.get_state(YMP.ConnectionProvider)

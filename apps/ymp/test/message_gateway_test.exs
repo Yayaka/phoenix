@@ -1,12 +1,6 @@
 defmodule YMP.MessageGatewayTest do
   use DB.DataCase
 
-  setup_all do
-    YMP.TestMessageHandler.start_link()
-    YMP.TestConnection.start_link()
-    :ok
-  end
-
   test "push to local" do
     YMP.TestMessageHandler.register("ymp-message-gateway-test-push")
     message = %{"sender" => %{

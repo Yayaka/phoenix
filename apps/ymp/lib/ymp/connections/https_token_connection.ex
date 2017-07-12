@@ -55,7 +55,6 @@ defmodule YMP.HTTPSTokenConnection do
           "token" => token,
           "expires" => expires,
           "state" => _state} = map
-        # TODO queue a delayed job to refresh the token
         {:ok, %__MODULE__{host_information: host_information,
           token: token,
           expires: expires}}

@@ -1,11 +1,6 @@
 defmodule YMP.HTTPSTokenConnectionTest do
   use DB.DataCase
 
-  setup_all do
-    YMP.TestMessageHandler.start_link()
-    :ok
-  end
-
   setup do
     bypass = Bypass.open
     host_information = %YMP.HostInformation{
