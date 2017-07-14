@@ -1,7 +1,7 @@
-defmodule YayakaPresentation.EventSubscriptionTest do
+defmodule YayakaPresentation.TimelineSubscriptionTest do
   use DB.DataCase
   import Ecto.Changeset
-  alias YayakaPresentation.EventSubscription
+  alias YayakaPresentation.TimelineSubscription
 
   test "valid changeset" do
     {:ok, user} = %Yayaka.User{
@@ -10,7 +10,7 @@ defmodule YayakaPresentation.EventSubscriptionTest do
     } |> DB.Repo.insert
     event = %{id: "id1", user_id: user.id,
       social_graph: %{host: "host1", service: :social_graph}}
-    changeset = EventSubscription.changeset(%EventSubscription{}, event)
+    changeset = TimelineSubscription.changeset(%TimelineSubscription{}, event)
     assert changeset.valid?
     assert get_change(changeset, :id) == "id1"
     assert get_change(changeset, :user_id) == user.id
@@ -20,7 +20,7 @@ defmodule YayakaPresentation.EventSubscriptionTest do
   test "invalid changeset" do
     event = %{user_id: 0,
       social_graph: %{host: "host1", service: :repository}}
-    changeset = EventSubscription.changeset(%EventSubscription{}, event)
+    changeset = TimelineSubscription.changeset(%TimelineSubscription{}, event)
     refute changeset.valid?
   end
 end

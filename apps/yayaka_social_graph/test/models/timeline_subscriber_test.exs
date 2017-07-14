@@ -1,7 +1,7 @@
-defmodule YayakaSocialGraph.EventSubscriberTest do
+defmodule YayakaSocialGraph.TimelineSubscriberTest do
   use DB.DataCase
   import Ecto.Changeset
-  alias YayakaSocialGraph.EventSubscriber
+  alias YayakaSocialGraph.TimelineSubscriber
 
   test "valid changeset" do
     {:ok, user} = %Yayaka.User{
@@ -16,7 +16,7 @@ defmodule YayakaSocialGraph.EventSubscriberTest do
       presentation: %{host: "host1", service: :presentation},
       sender: sender
     }
-    changeset = EventSubscriber.changeset(%EventSubscriber{}, params)
+    changeset = TimelineSubscriber.changeset(%TimelineSubscriber{}, params)
     assert changeset.valid?
     assert get_change(changeset, :id) == "id1"
     assert get_change(changeset, :identity).service == :identity
@@ -36,7 +36,7 @@ defmodule YayakaSocialGraph.EventSubscriberTest do
       matchers: [matcher1],
       sender: %{host: "host1", service: :presentation}
     }
-    changeset = EventSubscriber.changeset(%EventSubscriber{}, params)
+    changeset = TimelineSubscriber.changeset(%TimelineSubscriber{}, params)
     refute changeset.valid?
   end
 end

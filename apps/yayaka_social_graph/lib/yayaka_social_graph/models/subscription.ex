@@ -1,8 +1,8 @@
-defmodule YayakaSocialGraph.SocialGraphSubscription do
+defmodule YayakaSocialGraph.Subscription do
   use Ecto.Schema
   import Ecto.Changeset
 
-  schema "social_graph_subscriptions" do
+  schema "subscriptions" do
     belongs_to :user, Yayaka.User
     belongs_to :target_user, Yayaka.User
     field :social_graph, Yayaka.Service

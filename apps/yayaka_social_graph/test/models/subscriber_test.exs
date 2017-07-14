@@ -1,7 +1,7 @@
-defmodule YayakaSocialGraph.SocialGraphSubscriberTest do
+defmodule YayakaSocialGraph.SubscriberTest do
   use DB.DataCase
   import Ecto.Changeset
-  alias YayakaSocialGraph.SocialGraphSubscriber
+  alias YayakaSocialGraph.Subscriber
 
   test "valid changeset" do
     {:ok, user} = %Yayaka.User{
@@ -19,7 +19,7 @@ defmodule YayakaSocialGraph.SocialGraphSubscriberTest do
       social_graph: %{host: "host1", service: :social_graph},
       sender: sender
     }
-    changeset = SocialGraphSubscriber.changeset(%SocialGraphSubscriber{}, params)
+    changeset = Subscriber.changeset(%Subscriber{}, params)
     assert changeset.valid?
     assert get_change(changeset, :user_id) == user.id
     assert get_change(changeset, :target_user_id) == target_user.id
@@ -35,7 +35,7 @@ defmodule YayakaSocialGraph.SocialGraphSubscriberTest do
       social_graph: %{host: "host1", service: :presentation},
       sender: %{host: "host1", service: :presentation}
     }
-    changeset = SocialGraphSubscriber.changeset(%SocialGraphSubscriber{}, params)
+    changeset = Subscriber.changeset(%Subscriber{}, params)
     refute changeset.valid?
   end
 end

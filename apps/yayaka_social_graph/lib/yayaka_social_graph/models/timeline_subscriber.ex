@@ -1,9 +1,9 @@
-defmodule YayakaSocialGraph.EventSubscriber do
+defmodule YayakaSocialGraph.TimelineSubscriber do
   use Ecto.Schema
   import Ecto.Changeset
 
   @primary_key {:id, :string, autogenerate: false}
-  schema "event_subscribers" do
+  schema "timeline_subscribers" do
     field :identity, Yayaka.Service
     belongs_to :user, Yayaka.User
     field :presentation, Yayaka.Service
