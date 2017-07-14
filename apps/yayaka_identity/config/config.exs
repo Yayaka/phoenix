@@ -1,30 +1,104 @@
-# This file is responsible for configuring your application
-# and its dependencies with the aid of the Mix.Config module.
 use Mix.Config
 
-# This configuration is loaded before any dependency and is restricted
-# to this project. If another project depends on this project, this
-# file won't be loaded nor affect the parent project. For this reason,
-# if you want to provide default values for your application for
-# 3rd-party users, it should be done in your "mix.exs" file.
+string = %{"type" => "string"}
+host = %{"type" => "hostname"}
+service = %{
+  "enum" => ["presentation",
+           "identity",
+           "repository",
+           "social-graph",
+           "notification"]}
 
-# You can configure for your application as:
-#
-#     config :yayaka_identity, key: :value
-#
-# And access this configuration in your application as:
-#
-#     Application.get_env(:yayaka_identity, :key)
-#
-# Or configure a 3rd-party app:
-#
-#     config :logger, level: :info
-#
-
-# It is also possible to import configuration files, relative to this
-# directory. For example, you can emulate configuration per environment
-# by uncommenting the line below and defining dev.exs, test.exs and such.
-# Configuration from the imported file will override the ones defined
-# here (which is why it is important to import them last).
-#
-#     import_config "#{Mix.env}.exs"
+config :yayaka_identity, :user_attribute_types, %{
+  "yayaka" => %{
+    "service-labels" => %{
+      "type" => "object",
+      "properties" => %{
+        "labels" => %{
+          "type" => "array",
+          "items" => %{
+            "type" => "object",
+            "properties" => %{
+              "host" => host,
+              "service" => service,
+              "label" => string},
+            "additionalProperties" => false,
+            "required" => ["host", "service", "label"]}}},
+      "additionalProperties" => false,
+      "required" => ["labels"]},
+    "subscriber-hosts" => %{
+      "type" => "object",
+      "properties" => %{
+        "hosts" => %{
+          "type" => "array",
+          "items" => host}},
+      "additionalProperties" => false,
+      "required" => ["hosts"]},
+    "publisher-hosts" => %{
+      "type" => "object",
+      "properties" => %{
+        "hosts" => %{
+          "type" => "array",
+          "items" => host}},
+      "additionalProperties" => false,
+      "required" => ["hosts"]},
+    "primary-publisher-host" => %{
+      "type" => "object",
+      "properties" => %{"host" => string},
+      "additionalProperties" => false,
+      "required" => ["host"]},
+    "primary-repository-host" => %{
+      "type" => "object",
+      "properties" => %{"host" => string},
+      "additionalProperties" => false,
+      "required" => ["host"]},
+    "primary-notification-host" => %{
+      "type" => "object",
+      "properties" => %{"host" => string},
+      "additionalProperties" => false,
+      "required" => ["host"]},
+    "repository-subscriptions" => %{
+      "type" => "object",
+      "properties" => %{
+        "subscriptions" => %{
+          "type" => "array",
+          "items" => %{
+            "type" => "object",
+            "properties" => %{
+              "repository-host" => host,
+              "social-graph-host" => host},
+            "additionalProperties" => false,
+            "required" => ["repository-host", "social-graph-host"]}}},
+      "additionalProperties" => false,
+      "required" => ["subscriptions"]},
+    "biography" => %{
+      "type" => "object",
+      "properties" => %{"text" => string},
+      "additionalProperties" => false,
+      "required" => ["text"]},
+    "links" => %{
+      "type" => "object",
+      "properties" => %{
+        "urls" => %{
+          "type" => "array",
+          "items" => %{
+            "type" => "object",
+            "properties" => %{
+              "label" => string,
+              "url" => string},
+            "additionalProperties" => false,
+            "required" => ["label", "url"]}}},
+      "additionalProperties" => false,
+      "required" => ["urls"]},
+    "icon" => %{
+      "type" => "object",
+      "properties" => %{"url" => string},
+      "additionalProperties" => false,
+      "required" => ["url"]},
+    "name" => %{
+      "type" => "object",
+      "properties" => %{"text" => string},
+      "additionalProperties" => false,
+      "required" => ["text"]},
+  }
+}

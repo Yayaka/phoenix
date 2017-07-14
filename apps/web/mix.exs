@@ -21,7 +21,6 @@ defmodule Web.Mixfile do
   # Type `mix help compile.app` for more information.
   def application do
     [mod: {Web.Application, []},
-     applications: [:db],
      extra_applications: [:logger, :runtime_tools]]
   end
 

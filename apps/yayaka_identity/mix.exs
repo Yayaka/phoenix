@@ -15,13 +15,14 @@ defmodule YayakaIdentity.Mixfile do
   end
 
   def application do
-    [applications: [:db],
-     extra_applications: [:logger],
+    [extra_applications: [:logger],
      mod: {YayakaIdentity.Application, []}]
   end
 
   defp deps do
     [{:db, in_umbrella: true},
-     {:yayaka, in_umbrella: true}]
+     {:ymp, in_umbrella: true},
+     {:yayaka, in_umbrella: true},
+     {:ex_json_schema, "~> 0.5.5"}]
   end
 end

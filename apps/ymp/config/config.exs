@@ -11,6 +11,7 @@ config :ymp, :service_protocols,
 if Mix.env == :test do
   config :ymp, :connection_protocols, %{
     "test" => %{module: YMP.TestConnection},
+    "yayaka" => %{module: YMP.TestConnection},
     "test-a" => %{module: YMP.ConnectionProviderTest.A},
     "test-b" => %{module: YMP.ConnectionProviderTest.B}}
   config :ymp, service_protocols:

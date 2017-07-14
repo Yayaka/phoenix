@@ -16,8 +16,7 @@ defmodule YMP.Mixfile do
   end
 
   def application do
-    [applications: [:httpoison, :db],
-     extra_applications: [:logger],
+    [extra_applications: [:logger],
      mod: {YMP.Application, []}]
   end
 

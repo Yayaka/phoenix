@@ -14,6 +14,7 @@ yayaka = %{
                               primary-publisher-host
                               primary-repository-host
                               primary-notification-host
+                              repository-subscriptions
                               biography links icon name),
       "event-types" => ~w(post repost reply quote follow
                         delete-content update-content),

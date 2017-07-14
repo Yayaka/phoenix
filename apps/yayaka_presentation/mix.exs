@@ -15,13 +15,13 @@ defmodule YayakaPresentation.Mixfile do
   end
 
   def application do
-    [applications: [:db],
-     extra_applications: [:logger],
+    [extra_applications: [:logger],
      mod: {YayakaPresentation.Application, []}]
   end
 
   defp deps do
     [{:db, in_umbrella: true},
+     {:ymp, in_umbrella: true},
      {:yayaka, in_umbrella: true}]
   end
 end

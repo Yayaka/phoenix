@@ -3,6 +3,14 @@ defmodule YayakaIdentity.UserAttribute do
   import Ecto.Changeset
 
   @user_attributes Application.get_env(:yayaka, :user_attributes)
+  @user_attribute_types Application.get_env(:yayaka_identity, :user_attribute_types)
+  |> Enum.map(fn {key, value} ->
+    value = Enum.map(value, fn {key, value} ->
+      {key, ExJsonSchema.Schema.resolve(value)}
+    end) |> Enum.into(%{})
+    {key, value}
+  end)
+  |> Enum.into(%{})
 
   schema "user_attributes" do
     belongs_to :identity_user, YayakaIdentity.IdentityUser, type: :string
@@ -31,6 +39,18 @@ defmodule YayakaIdentity.UserAttribute do
             [{:key, "is invalid"}]
           end
         _ -> [{:protocol, "is invalid"}]
+      end
+    end)
+    |> validate_change(:value, fn :value, value ->
+      protocol = get_change(changeset, :protocol)
+      key = get_change(changeset, :key)
+      schema = get_in(@user_attribute_types, [protocol, key])
+      with false <- is_nil(schema),
+           true <- ExJsonSchema.Validator.valid?(schema, value) do
+        [] # No errors
+      else
+        _ ->
+          [{:value, "is invalid"}]
       end
     end)
   end
