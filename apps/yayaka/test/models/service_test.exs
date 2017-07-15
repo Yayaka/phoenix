@@ -18,6 +18,6 @@ defmodule Yayaka.ServiceTest do
 
   test "load" do
     service1 = Ecto.Type.load(Yayaka.Service, "repository:host1")
-    assert service1 == %{host: "host1", service: :repository}
+    assert service1 == {:ok, %{host: "host1", service: :repository}}
   end
 end

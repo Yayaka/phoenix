@@ -1,5 +1,9 @@
 defmodule YMP.MessageGateway do
-  @timeout 5000
+  if Mix.env == :test do
+    @timeout 200
+  else
+    @timeout 5000
+  end
 
   @service_protocols Application.get_env(:ymp, :service_protocols)
 

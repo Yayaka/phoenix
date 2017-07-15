@@ -11,12 +11,14 @@ defmodule YayakaIdentity.IdentityUserTest do
       value: %{"text" => "biography1"}, sender: sender}
     params = %{
       id: "user1",
+      name: "name1",
       user_attributes: [attribute1, attribute2],
       sender: sender
     }
     changeset = IdentityUser.changeset(%IdentityUser{}, params)
     assert changeset.valid?
     assert get_change(changeset, :id) == "user1"
+    assert get_change(changeset, :name) == "name1"
     assert get_change(changeset, :sender) == sender
     attributes = get_change(changeset, :user_attributes)
     assert length(attributes) == 2
@@ -36,6 +38,7 @@ defmodule YayakaIdentity.IdentityUserTest do
       value: %{}, sender: sender}
     params = %{
       id: "user1",
+      name: "name1",
       user_attributes: [attribute1, attribute2],
       sender: sender
     }

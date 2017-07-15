@@ -58,10 +58,13 @@ defmodule DB.Repo.Migrations.AddTables do
 
     create table(:identity_users, primary_key: false) do
       add :id, :string, primary_key: true
+      add :name, :string
 
       add :sender, :string
       timestamps()
     end
+    create unique_index(:identity_users, [:name],
+                        name: :identity_users_unique_index)
 
     create table(:user_attributes) do
       add :identity_user_id, references(:identity_users, type: :string)

@@ -10,9 +10,10 @@ defmodule YMP.TestMessageHandler do
   def handle(message) do
     action = message["action"]
     Registry.dispatch(__MODULE__, action, fn entries ->
-      for {pid, :ok} <- entries do
+      Enum.uniq(entries)
+      |> Enum.each(fn {pid, :ok} ->
         send pid, message
-      end
+      end)
     end)
     :ok
   end

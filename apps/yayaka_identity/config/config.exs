@@ -1,7 +1,7 @@
 use Mix.Config
 
 string = %{"type" => "string"}
-host = %{"type" => "hostname"}
+host = %{"type" => "string"}
 service = %{
   "enum" => ["presentation",
            "identity",

@@ -16,34 +16,35 @@ defmodule Yayaka.Service do
   # Callbacks
   def type, do: :string
 
-  def cast(%{host: host, service: service}) when service in @services_atom do
+  def cast(%{host: host, service: service}), do: do_cast(host, service)
+  def cast(%{"host" => host, "service" => service}), do: do_cast(host, service)
+  def cast(_), do: :error
+
+  def do_cast(host, service) when service in @services_atom do
     case Ecto.Type.cast(:string, host) do
       {:ok, host} -> {:ok, %{host: host, service: service}}
       _ -> :error
     end
   end
-
-  def cast(%{"host" => host, "service" => service}) when service in @services_string do
+  def do_cast(host, service)  when service in @services_string do
     case Ecto.Type.cast(:string, host) do
       {:ok, host} -> {:ok, %{host: host, service: String.to_atom(service)}}
       _ -> :error
     end
   end
 
-  def cast(_), do: :error
-
   # delimiter is ":"
   def load("presentation:" <> host) do
-    %{host: host, service: :presentation}
+    {:ok, %{host: host, service: :presentation}}
   end
   def load("identity:" <> host) do
-    %{host: host, service: :identity}
+    {:ok, %{host: host, service: :identity}}
   end
   def load("repository:" <> host) do
-    %{host: host, service: :repository}
+    {:ok, %{host: host, service: :repository}}
   end
   def load("social_graph:" <> host) do
-    %{host: host, service: :social_graph}
+    {:ok, %{host: host, service: :social_graph}}
   end
 
   def dump(%{host: host, service: service}) do

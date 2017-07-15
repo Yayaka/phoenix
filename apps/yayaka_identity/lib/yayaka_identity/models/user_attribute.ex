@@ -42,8 +42,8 @@ defmodule YayakaIdentity.UserAttribute do
       end
     end)
     |> validate_change(:value, fn :value, value ->
-      protocol = get_change(changeset, :protocol)
-      key = get_change(changeset, :key)
+      protocol = get_field(changeset, :protocol)
+      key = get_field(changeset, :key)
       schema = get_in(@user_attribute_types, [protocol, key])
       with false <- is_nil(schema),
            true <- ExJsonSchema.Validator.valid?(schema, value) do
