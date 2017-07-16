@@ -105,19 +105,6 @@ defmodule DB.Repo.Migrations.AddTables do
       timestamps()
     end
 
-    create table(:contents, primary_key: false) do
-      add :id, :string, primary_key: true
-
-      add :user_id, references(:users)
-      add :protocol, :string
-      add :type, :string
-      add :body, :map
-      add :deleted, :boolean, default: false
-
-      add :sender, :string
-      timestamps()
-    end
-
     # Social graph
 
     create table(:subscriptions) do

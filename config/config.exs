@@ -17,7 +17,7 @@ yayaka = %{
                               repository-subscriptions
                               biography links icon name),
       "event-types" => ~w(post repost reply quote follow
-                        delete-content update-content),
+                          delete-post update-post),
       "content-types" => ~w(plaintext),
       "notification-types" => ~w(follow reply repost quote)
     }]
