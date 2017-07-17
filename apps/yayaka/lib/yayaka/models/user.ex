@@ -1,20 +1,23 @@
 defmodule Yayaka.User do
-  use Ecto.Schema
-  import Ecto.Changeset
+  @behaviour Ecto.Type
 
-  schema "users" do
-    field :identity, Yayaka.Service
-    field :user_id, :string
+  # Callbacks
+  def type, do: :string
 
-    timestamps()
+  def cast(%{host: host, id: id}) do
+    {:ok, %{host: host, id: id}}
+  end
+  def cast(%{"host" => host, "id" => id}) do
+    {:ok, %{host: host, id: id}}
+  end
+  def cast(_), do: :error
+
+  def load(user) do
+    [host, id] = Poison.decode!(user)
+    {:ok, %{host: host, id: id}}
   end
 
-  @fields [:identity, :user_id]
-  def changeset(user, params) do
-    user
-    |> cast(params, @fields)
-    |> validate_required(@fields)
-    |> unique_constraint(:user_id, name: :users_host_user_id_index)
-    |> Yayaka.Service.validate_service(:identity, :identity)
+  def dump(%{host: host, id: id}) do
+    {:ok, Poison.encode!([host, id])}
   end
 end

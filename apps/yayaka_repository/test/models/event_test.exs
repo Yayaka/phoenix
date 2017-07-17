@@ -4,14 +4,10 @@ defmodule YayakaRepository.EventTest do
   alias YayakaRepository.Event
 
   test "valid changeset" do
-    {:ok, user} = %Yayaka.User{
-      identity: %{host: "host1", service: :identity},
-      user_id: "user1"
-    } |> DB.Repo.insert
     sender = %{host: "host1", service: :presentation}
     params = %{
       id: "id1",
-      user_id: user.id,
+      user: %{host: "host1", id: "user1"},
       protocol: "yayaka",
       type: "delete-post",
       body: %{"event-id" => "id0"},
@@ -20,7 +16,7 @@ defmodule YayakaRepository.EventTest do
     changeset = Event.changeset(%Event{}, params)
     assert changeset.valid?
     assert get_change(changeset, :id) == "id1"
-    assert get_change(changeset, :user_id) == user.id
+    assert get_change(changeset, :user) == %{host: "host1", id: "user1"}
     assert get_change(changeset, :protocol) == "yayaka"
     assert get_change(changeset, :type) == "delete-post"
     assert get_change(changeset, :body)["event-id"] == "id0"
@@ -31,7 +27,7 @@ defmodule YayakaRepository.EventTest do
   test "invalid changeset" do
     params = %{
       id: "id1",
-      user_id: 0,
+      user: %{host: "host1", id: "user1"},
       protocol: "yayaka",
       type: "invalid-type",
       body: %{id: "id0"},
@@ -44,7 +40,7 @@ defmodule YayakaRepository.EventTest do
   defp wrap_body(protocol, type, body) do
     %{
       id: "id1",
-      user_id: 0,
+      user: %{host: "host1", id: "user1"},
       protocol: protocol,
       type: type,
       body: body,

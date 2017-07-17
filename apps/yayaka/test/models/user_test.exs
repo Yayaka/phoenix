@@ -1,24 +1,23 @@
 defmodule Yayaka.UserTest do
-  use DB.DataCase
+  use ExUnit.Case
 
-  test "valid changeset" do
-    user1 = %{
-      identity: %{host: "host1", service: :identity},
-      user_id: "user1"
-    }
-    changeset = Yayaka.User.changeset(%Yayaka.User{}, user1)
-    assert changeset.valid?
-    assert Ecto.Changeset.get_change(changeset, :identity).service == :identity
-    assert Ecto.Changeset.get_change(changeset, :user_id) == "user1"
-    assert match? {:ok, _}, DB.Repo.insert(changeset)
+  test "cast" do
+    user1 = Ecto.Type.cast(Yayaka.User,
+                              %{host: "host1", id: "user1"})
+    user2 = Ecto.Type.cast(Yayaka.User,
+                              %{"host" => "host2", "id" => "user2"})
+    assert user1 == {:ok, %{host: "host1", id: "user1"}}
+    assert user2 == {:ok, %{host: "host2", id: "user2"}}
   end
 
-  test "invalid changeset" do
-    user1 = %{
-      identity: %{host: "host1", service: :repository},
-      user_id: "user1"
-    }
-    changeset = Yayaka.User.changeset(%Yayaka.User{}, user1)
-    refute changeset.valid?
+  test "dump" do
+    user1 = Ecto.Type.dump(Yayaka.User,
+                              %{host: "host1", id: "user1"})
+    assert user1 == {:ok, "[\"host1\",\"user1\"]"}
+  end
+
+  test "load" do
+    user1 = Ecto.Type.load(Yayaka.User, "[\"host1\",\"user1\"]")
+    assert user1 == {:ok, %{host: "host1", id: "user1"}}
   end
 end

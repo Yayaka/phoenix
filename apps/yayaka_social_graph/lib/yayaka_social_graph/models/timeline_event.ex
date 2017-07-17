@@ -3,11 +3,11 @@ defmodule YayakaSocialGraph.TimelineEvent do
   import Ecto.Changeset
 
   schema "timeline_events" do
-    belongs_to :user, Yayaka.User
+    field :user, Yayaka.User
     belongs_to :event, YayakaSocialGraph.Event
   end
 
-  @required_fields [:user_id, :event_id]
+  @required_fields [:user, :event_id]
   def changeset(event, params) do
     event
     |> cast(params, @required_fields)

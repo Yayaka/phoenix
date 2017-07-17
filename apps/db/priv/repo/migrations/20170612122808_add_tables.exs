@@ -14,17 +14,6 @@ defmodule DB.Repo.Migrations.AddTables do
       timestamps()
     end
 
-    # Yayaka
-
-    create table(:users) do
-      add :identity, :string
-      add :user_id, :string
-
-      timestamps()
-    end
-    create unique_index(:users, [:identity, :user_id],
-                        name: :users_host_user_id_index)
-
     # Presentaion
 
     create table(:provided_users) do
@@ -38,17 +27,17 @@ defmodule DB.Repo.Migrations.AddTables do
 
     create table(:user_links) do
       add :provided_user_id, references(:provided_users)
-      add :user_id, references(:users)
+      add :user, :string
 
       timestamps()
     end
-    create unique_index(:user_links, [:provided_user_id, :user_id],
+    create unique_index(:user_links, [:provided_user_id, :user],
                         name: :user_links_unique_index)
 
     create table(:timeline_subscriptions, primary_key: false) do
       add :id, :string, primary_key: true
 
-      add :user_id, references(:users)
+      add :user, :string
       add :social_graph, :string
 
       timestamps()
@@ -96,7 +85,7 @@ defmodule DB.Repo.Migrations.AddTables do
     create table(:events, primary_key: false) do
       add :id, :string, primary_key: true
 
-      add :user_id, references(:users)
+      add :user, :string
       add :protocol, :string
       add :type, :string
       add :body, :map
@@ -108,31 +97,31 @@ defmodule DB.Repo.Migrations.AddTables do
     # Social graph
 
     create table(:subscriptions) do
-      add :user_id, references(:users)
-      add :target_user_id, references(:users)
+      add :user, :string
+      add :target_user, :string
       add :social_graph, :string
 
       add :sender, :string
       timestamps()
     end
-    create unique_index(:subscriptions, [:user_id, :target_user_id, :social_graph],
+    create unique_index(:subscriptions, [:user, :target_user, :social_graph],
                         name: :subscriptions_unique_index)
 
     create table(:subscribers) do
-      add :user_id, references(:users)
-      add :target_user_id, references(:users)
+      add :user, :string
+      add :target_user, :string
       add :social_graph, :string
 
       add :sender, :string
       timestamps()
     end
-    create unique_index(:subscribers, [:user_id, :target_user_id, :social_graph],
+    create unique_index(:subscribers, [:user, :target_user, :social_graph],
                         name: :subscribers_unique_index)
 
     create table(:timeline_subscribers, primary_key: false) do
       add :id, :string, primary_key: true
       add :identity, :string
-      add :user_id, references(:users)
+      add :user, :string
 
       add :presentation, :string
 
@@ -150,7 +139,7 @@ defmodule DB.Repo.Migrations.AddTables do
     end
 
     create table(:timeline_events) do
-      add :user_id, references(:users)
+      add :user, :string
       add :event_id, references(:social_graph_events)
     end
   end
