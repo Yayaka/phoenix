@@ -23,6 +23,7 @@ defmodule YayakaRepository.Mixfile do
     [{:db, in_umbrella: true},
      {:ymp, in_umbrella: true},
      {:yayaka, in_umbrella: true},
+     {:yayaka_identity, in_umbrella: true, only: :test},
      {:ex_json_schema, "~> 0.5.5"}]
   end
 end

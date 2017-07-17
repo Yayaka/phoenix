@@ -1,39 +1,26 @@
 defmodule YayakaIdentity.MessageHandler do
   @behaviour YMP.MessageHandler
 
-  @services Application.get_env(:yayaka, :message_handlers)
-
   alias YayakaIdentity.IdentityUser
   alias YayakaIdentity.UserAttribute
   alias YayakaIdentity.AuthorizedService
+  alias Yayaka.MessageHandler.Utils
   import Ecto.Changeset
   import Ecto.Query
   require Logger
 
-  defp new_answer(message, body) do
-    payload = %{
-      "status" => "ok",
-      "body" => body
-    }
-    YMP.Message.new_answer(message, payload)
-  end
-
-  defp get_sender(message) do
-    sender = message["sender"]
-    %{host: sender["host"], service: sender["service"]}
-  end
-
   defp is_authorized(service, user_id) do
+    import Ecto.Query
     query = from a in AuthorizedService,
-      where: a.identity_user_id == ^user_id,
-      where: a.service == ^service
+    where: a.identity_user_id == ^user_id,
+    where: a.service == ^service
     1 == DB.Repo.aggregate(query, :count, :id)
   end
 
   def handle(%{"action" => "create-user"} = message) do
     %{"user-name" => user_name,
       "attributes" => attributes} = message["payload"]
-    sender = get_sender(message)
+    sender = Utils.get_sender(message)
     attributes = Enum.map(attributes, fn attribute ->
       Map.put(attribute, "sender", sender)
     end)
@@ -55,7 +42,7 @@ defmodule YayakaIdentity.MessageHandler do
       "user-id" => identity_user.id,
       "user-name" => identity_user.name
     }
-    answer = new_answer(message, body)
+    answer = Utils.new_answer(message, body)
     YMP.MessageGateway.push(answer)
   end
 
@@ -66,14 +53,14 @@ defmodule YayakaIdentity.MessageHandler do
     body = %{
       "availability" => availability
     }
-    answer = new_answer(message, body)
+    answer = Utils.new_answer(message, body)
     YMP.MessageGateway.push(answer)
   end
 
   def handle(%{"action" => "update-user-name"} = message) do
     %{"user-id" => user_id,
       "user-name" => user_name} = message["payload"]
-    sender = get_sender(message)
+    sender = Utils.get_sender(message)
     true = is_authorized(sender, user_id)
     query = from u in IdentityUser, where: u.name == ^user_name
     availability = DB.Repo.aggregate(query, :count, :id) == 0
@@ -88,14 +75,14 @@ defmodule YayakaIdentity.MessageHandler do
     body = %{
       "user-name" => user.name
     }
-    answer = new_answer(message, body)
+    answer = Utils.new_answer(message, body)
     YMP.MessageGateway.push(answer)
   end
 
   def handle(%{"action" => "update-user-attributes"} = message) do
     %{"user-id" => user_id,
       "attributes" => attributes} = message["payload"]
-    sender = get_sender(message)
+    sender = Utils.get_sender(message)
     true = is_authorized(sender, user_id)
     query = IdentityUser
             |> where([i], i.id == ^user_id)
@@ -127,7 +114,7 @@ defmodule YayakaIdentity.MessageHandler do
       end
     end)
     {:ok, _result} = DB.Repo.transaction(multi)
-    answer = new_answer(message, %{})
+    answer = Utils.new_answer(message, %{})
     YMP.MessageGateway.push(answer)
   end
 
@@ -155,14 +142,14 @@ defmodule YayakaIdentity.MessageHandler do
       "user-name" => user.name,
       "attributes" => attributes,
       "authorized-services" => authorized_services}
-    answer = new_answer(message, body)
+    answer = Utils.new_answer(message, body)
     YMP.MessageGateway.push(answer)
   end
 
   def handle(%{"action" => "get-token"} = message) do
     %{"user-id" => user_id,
       "presentation-host" => host} = message["payload"]
-    sender = get_sender(message)
+    sender = Utils.get_sender(message)
     true = is_authorized(sender, user_id)
     resource = %{host: host}
     {:ok, token, claims} = Guardian.encode_and_sign(resource)
@@ -171,14 +158,14 @@ defmodule YayakaIdentity.MessageHandler do
       "token" => token,
       "expires" => expires
     }
-    answer = new_answer(message, body)
+    answer = Utils.new_answer(message, body)
     YMP.MessageGateway.push(answer)
   end
 
   def handle(%{"action" => "authenticate-user"} = message) do
     %{"user-id" => user_id,
       "token" => token} = message["payload"]
-    sender = get_sender(message)
+    sender = Utils.get_sender(message)
     sender_host = sender.host
     {:ok, claims} = Guardian.decode_and_verify(token)
     {:ok, %{"host" => ^sender_host}} = Guardian.serializer.from_token(claims["sub"])
@@ -189,7 +176,7 @@ defmodule YayakaIdentity.MessageHandler do
       changeset = AuthorizedService.changeset(%AuthorizedService{}, params)
       authorized_service = DB.Repo.insert!(changeset)
     end
-    answer = new_answer(message, %{})
+    answer = Utils.new_answer(message, %{})
     YMP.MessageGateway.push(answer)
   end
 
@@ -197,7 +184,7 @@ defmodule YayakaIdentity.MessageHandler do
     %{"user-id" => user_id,
       "host" => host,
       "service" => service} = message["payload"]
-    sender = get_sender(message)
+    sender = Utils.get_sender(message)
     service = %{host: host, service: service}
     true = is_authorized(sender, user_id)
     if not is_authorized(service, user_id) do
@@ -207,7 +194,7 @@ defmodule YayakaIdentity.MessageHandler do
       changeset = AuthorizedService.changeset(%AuthorizedService{}, params)
       authorized_service = DB.Repo.insert!(changeset)
     end
-    answer = new_answer(message, %{})
+    answer = Utils.new_answer(message, %{})
     YMP.MessageGateway.push(answer)
   end
 
@@ -215,14 +202,14 @@ defmodule YayakaIdentity.MessageHandler do
     %{"user-id" => user_id,
       "host" => host,
       "service" => service} = message["payload"]
-    sender = get_sender(message)
+    sender = Utils.get_sender(message)
     service = %{host: host, service: service}
     true = is_authorized(sender, user_id)
     query = from a in AuthorizedService,
       where: a.identity_user_id == ^user_id,
       where: a.service == ^service
     DB.Repo.delete_all(query)
-    answer = new_answer(message, %{})
+    answer = Utils.new_answer(message, %{})
     YMP.MessageGateway.push(answer)
   end
 end
