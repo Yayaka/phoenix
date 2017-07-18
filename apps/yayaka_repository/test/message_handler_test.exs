@@ -6,38 +6,15 @@ defmodule YayakaRepository.MessageHandlerTest do
   alias YayakaRepository.Event
   alias Yayaka.MessageHandler.Utils
   import Ecto.Query
+  import YMP.TestMessageHandler, only: [request: 2, request: 3]
 
   setup do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(DB.Repo)
-  end
-
-  def request(message, error \\ false) do
-    pid = self()
-    task = Task.async(fn ->
-      Ecto.Adapters.SQL.Sandbox.allow(DB.Repo, pid, self())
-      pid = self()
-      YMP.TestMessageHandler.register(message["action"])
-      spawn_link fn -> send pid, YMP.MessageGateway.request(message) end
-      receive do
-        ^message ->
-          if error do
-            try do
-              YayakaRepository.MessageHandler.handle(message)
-            rescue
-          _ -> :ok
-            end
-          else
-            YayakaRepository.MessageHandler.handle(message)
-          end
-      end
-      receive do
-        x -> x
-      end
-    end)
-    Task.await(task)
+    Ecto.Adapters.SQL.Sandbox.mode(DB.Repo, {:shared, self()})
   end
 
   @host YMP.get_host()
+  @handler YayakaRepository.MessageHandler
 
   def create_message(action, payload, sender_service \\ "presentation") do
     YMP.Message.new(@host,
@@ -79,7 +56,6 @@ defmodule YayakaRepository.MessageHandlerTest do
     authorization = authorize(user)
 
     spawn_link(fn ->
-      Ecto.Adapters.SQL.Sandbox.allow(DB.Repo, pid, self())
       YMP.TestMessageHandler.register("fetch-user")
       receive do
         message ->
@@ -87,7 +63,6 @@ defmodule YayakaRepository.MessageHandlerTest do
       end
     end)
     spawn_link(fn ->
-      Ecto.Adapters.SQL.Sandbox.allow(DB.Repo, pid, self())
       YMP.TestMessageHandler.register("push-event")
       receive do
         message ->
@@ -109,7 +84,7 @@ defmodule YayakaRepository.MessageHandlerTest do
             "body" => %{"text" => "text1"}
           }]}}
     message = create_message("create-event", payload)
-    {:ok, answer} = request(message)
+    {:ok, answer} = request(@handler, message)
     body = answer["payload"]["body"]
     receive do
       pushed ->
@@ -150,7 +125,7 @@ defmodule YayakaRepository.MessageHandlerTest do
       "event-id" => "aaa",
     }
     message = create_message("fetch-event", payload)
-    {:ok, answer} = request(message)
+    {:ok, answer} = request(@handler, message)
     body = answer["payload"]["body"]
     assert body["identity-host"] == event.user.host
     assert body["user-id"] == event.user.id

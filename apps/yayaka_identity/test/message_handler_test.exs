@@ -4,33 +4,15 @@ defmodule YayakaIdentity.MessageHandlerTest do
   alias YayakaIdentity.IdentityUser
   alias YayakaIdentity.AuthorizedService
   import Ecto.Query
+  import YMP.TestMessageHandler, only: [request: 2, request: 3]
 
   setup do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(DB.Repo)
-  end
-
-  def request(message, error \\ false) do
-    pid = self()
-    YMP.TestMessageHandler.register(message["action"])
-    spawn_link fn -> send pid, YMP.MessageGateway.request(message) end
-    receive do
-      ^message ->
-        if error do
-          try do
-            YayakaIdentity.MessageHandler.handle(message)
-          rescue
-            x -> :ok
-          end
-        else
-          YayakaIdentity.MessageHandler.handle(message)
-        end
-    end
-    receive do
-      x -> x
-    end
+    Ecto.Adapters.SQL.Sandbox.mode(DB.Repo, {:shared, self()})
   end
 
   @host YMP.get_host()
+  @handler YayakaIdentity.MessageHandler
 
   def create_message(action, payload) do
     YMP.Message.new(@host,
@@ -63,7 +45,7 @@ defmodule YayakaIdentity.MessageHandlerTest do
       ]
     }
     message = create_message("create-user", payload)
-    {:ok, answer} = request(message)
+    {:ok, answer} = request(@handler, message)
     body = answer["payload"]["body"]
     user = DB.Repo.get(IdentityUser, body["user-id"])
     assert body["user-name"] == "user1"
@@ -77,7 +59,7 @@ defmodule YayakaIdentity.MessageHandlerTest do
       "attributes" => []
     }
     message = create_message("create-user", payload)
-    {:ok, answer} = request(message)
+    {:ok, answer} = request(@handler, message)
     body = answer["payload"]["body"]
     user = DB.Repo.get(IdentityUser, body["user-id"])
     assert body["user-name"] != "user1"
@@ -95,13 +77,13 @@ defmodule YayakaIdentity.MessageHandlerTest do
       "user-name" => "user1",
     }
     message = create_message("check-user-name-availability", payload)
-    {:ok, answer} = request(message)
+    {:ok, answer} = request(@handler, message)
     refute answer["payload"]["body"]["availability"]
     payload = %{
       "user-name" => "user2",
     }
     message = create_message("check-user-name-availability", payload)
-    {:ok, answer} = request(message)
+    {:ok, answer} = request(@handler, message)
     assert answer["payload"]["body"]["availability"]
   end
 
@@ -118,7 +100,7 @@ defmodule YayakaIdentity.MessageHandlerTest do
       "user-name" => "user1"
     }
     message = create_message("update-user-name", payload)
-    {:ok, answer} = request(message)
+    {:ok, answer} = request(@handler, message)
     body = answer["payload"]["body"]
     assert body["user-name"] == "user1"
     payload = %{
@@ -126,7 +108,7 @@ defmodule YayakaIdentity.MessageHandlerTest do
       "user-name" => "user2"
     }
     message = create_message("update-user-name", payload)
-    {:ok, answer} = request(message)
+    {:ok, answer} = request(@handler, message)
     body = answer["payload"]["body"]
     assert body["user-name"] == "user2"
 
@@ -136,7 +118,7 @@ defmodule YayakaIdentity.MessageHandlerTest do
       "user-name" => "user2"
     }
     message = create_message("update-user-name", payload)
-    assert :timeout == request(message, true)
+    assert :timeout == request(@handler, message, true)
   end
 
   test "update-user-attributes" do
@@ -170,7 +152,7 @@ defmodule YayakaIdentity.MessageHandlerTest do
       "attributes" => attributes
     }
     message = create_message("update-user-attributes", payload)
-    {:ok, answer} = request(message)
+    {:ok, answer} = request(@handler, message)
     assert answer["payload"]["body"] == %{}
     user = DB.Repo.get(IdentityUser, user.id) |> DB.Repo.preload([:user_attributes])
     attributes = user.user_attributes
@@ -191,7 +173,7 @@ defmodule YayakaIdentity.MessageHandlerTest do
       "attributes" => attributes
     }
     message = create_message("update-user-attributes", payload)
-    assert :timeout == request(message, true)
+    assert :timeout == request(@handler, message, true)
   end
 
   test "fetch-user" do
@@ -222,7 +204,7 @@ defmodule YayakaIdentity.MessageHandlerTest do
       "user-id" => user.id
     }
     message = create_message("fetch-user", payload)
-    {:ok, answer} = request(message)
+    {:ok, answer} = request(@handler, message)
     body = answer["payload"]["body"]
     assert body["user-name"] == "name1"
     attributes = body["attributes"]
@@ -256,7 +238,7 @@ defmodule YayakaIdentity.MessageHandlerTest do
       "presentation-host" => "host1"
     }
     message = create_message("get-token", payload)
-    {:ok, answer} = request(message)
+    {:ok, answer} = request(@handler, message)
     body = answer["payload"]["body"]
     token = body["token"]
     {:ok, claims} = Guardian.decode_and_verify(token)
@@ -269,7 +251,7 @@ defmodule YayakaIdentity.MessageHandlerTest do
       "presentation-host" => "host1"
     }
     message = create_message("get-token", payload)
-    assert :timeout == request(message, true)
+    assert :timeout == request(@handler, message, true)
   end
 
   test "authenticate-user" do
@@ -290,7 +272,7 @@ defmodule YayakaIdentity.MessageHandlerTest do
       "token" => token
     }
     message = create_message("authenticate-user", payload)
-    assert :timeout == request(message, true)
+    assert :timeout == request(@handler, message, true)
     assert 0 == DB.Repo.aggregate(query, :count, :id)
 
     payload = %{
@@ -298,7 +280,7 @@ defmodule YayakaIdentity.MessageHandlerTest do
       "token" => "aaaa"
     }
     message = create_message("authenticate-user", payload)
-    assert :timeout == request(message, true)
+    assert :timeout == request(@handler, message, true)
     assert 0 == DB.Repo.aggregate(query, :count, :id)
 
     resource = %{host: @host}
@@ -308,7 +290,7 @@ defmodule YayakaIdentity.MessageHandlerTest do
       "token" => token
     }
     message = create_message("authenticate-user", payload)
-    {:ok, answer} = request(message)
+    {:ok, answer} = request(@handler, message)
     assert %{} == answer["payload"]["body"]
     assert 1 == DB.Repo.aggregate(query, :count, :id)
   end
@@ -326,17 +308,17 @@ defmodule YayakaIdentity.MessageHandlerTest do
       "service" => "presentation"
     }
     message = create_message("authorize-service", payload)
-    assert :timeout == request(message, true)
+    assert :timeout == request(@handler, message, true)
 
     authorization = authorize(user)
-    {:ok, answer} = request(message)
+    {:ok, answer} = request(@handler, message)
     payload = %{
       "user-id" => user.id,
       "host" => "host1",
       "service" => "repository"
     }
     message = create_message("authorize-service", payload)
-    {:ok, answer} = request(message)
+    {:ok, answer} = request(@handler, message)
     assert %{} == answer["payload"]["body"]
     query = from a in AuthorizedService,
       where: a.identity_user_id == ^user.id,
@@ -365,18 +347,18 @@ defmodule YayakaIdentity.MessageHandlerTest do
       "service" => "repository"
     }
     message = create_message("revoke-service-authorization", payload)
-    assert :timeout == request(message, true)
+    assert :timeout == request(@handler, message, true)
     assert 1 == DB.Repo.aggregate(query, :count, :id)
 
     authorization = authorize(user)
-    {:ok, answer} = request(message)
+    {:ok, answer} = request(@handler, message)
     payload = %{
       "user-id" => user.id,
       "host" => "host1",
       "service" => "repository"
     }
     message = create_message("revoke-service-authorization", payload)
-    {:ok, answer} = request(message)
+    {:ok, answer} = request(@handler, message)
     assert %{} == answer["payload"]["body"]
     assert 0 == DB.Repo.aggregate(query, :count, :id)
   end
