@@ -6,7 +6,7 @@ defmodule YayakaSocialGraph.EventTest do
   test "valid changeset" do
     sender = %{host: "host1", service: :presentation}
     params = %{
-      social_graph: %{host: "host2", service: :social_graph},
+      repository: %{host: "host2", service: :repository},
       event_id: "a",
       event: %{a: 1},
       sender: sender
@@ -21,7 +21,7 @@ defmodule YayakaSocialGraph.EventTest do
   test "invalid changeset" do
     sender = %{host: "host1", service: :presentation}
     params = %{
-      social_graph: %{host: "host2", service: :presentation},
+      repository: %{host: "host2", service: :presentation},
       event_id: "a",
       event: %{a: 1},
       sender: sender

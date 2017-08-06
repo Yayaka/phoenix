@@ -5,6 +5,8 @@ defmodule YayakaSocialGraph.TimelineEvent do
   schema "timeline_events" do
     field :user, Yayaka.User
     belongs_to :event, YayakaSocialGraph.Event
+
+    timestamps()
   end
 
   @required_fields [:user, :event_id]

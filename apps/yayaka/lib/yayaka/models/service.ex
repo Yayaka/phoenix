@@ -1,8 +1,13 @@
 defmodule Yayaka.Service do
   @behaviour Ecto.Type
 
-  @services_atom Application.get_env(:yayaka, :services)
-  @services_string Enum.map(@services_atom, &to_string/1)
+  @services_atom [:identity, :repository, :social_graph, :presentation, :notification]
+  @services_string Enum.map(@services_atom, fn atom ->
+    to_string(atom)
+    |> String.replace("_", "-")
+  end)
+  @atom_string_map Enum.zip(@services_atom, @services_string) |> Enum.into(%{})
+  @string_atom_map Enum.zip(@services_string, @services_atom) |> Enum.into(%{})
 
   def validate_service(changeset, field, service) do
     Ecto.Changeset.validate_change(changeset, field, fn ^field, map ->
@@ -28,26 +33,22 @@ defmodule Yayaka.Service do
   end
   def do_cast(host, service)  when service in @services_string do
     case Ecto.Type.cast(:string, host) do
-      {:ok, host} -> {:ok, %{host: host, service: String.to_atom(service)}}
+      {:ok, host} ->
+        index = Enum.find_index(@services_string, fn string -> string == service end)
+        service = Enum.at(@services_atom, index)
+        {:ok, %{host: host, service: service}}
       _ -> :error
     end
   end
 
   # delimiter is ":"
-  def load("presentation:" <> host) do
-    {:ok, %{host: host, service: :presentation}}
-  end
-  def load("identity:" <> host) do
-    {:ok, %{host: host, service: :identity}}
-  end
-  def load("repository:" <> host) do
-    {:ok, %{host: host, service: :repository}}
-  end
-  def load("social_graph:" <> host) do
-    {:ok, %{host: host, service: :social_graph}}
+  def load(string) do
+    [service, host] = String.split(string, ":", parts: 2)
+    {:ok, %{host: host, service: service}}
   end
 
   def dump(%{host: host, service: service}) do
+    service = @atom_string_map[service]
     {:ok, "#{service}:#{host}"}
   end
 end

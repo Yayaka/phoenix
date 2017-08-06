@@ -22,6 +22,8 @@ defmodule YayakaSocialGraph.Mixfile do
   defp deps do
     [{:db, in_umbrella: true},
      {:ymp, in_umbrella: true},
-     {:yayaka, in_umbrella: true}]
+     {:yayaka, in_umbrella: true},
+     {:yayaka_identity, in_umbrella: true, only: :test},
+     {:yayaka_repository, in_umbrella: true, only: :test}]
   end
 end

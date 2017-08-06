@@ -3,8 +3,8 @@ defmodule YMP.TestConnection do
   def start_link() do
     Registry.start_link(:duplicate, __MODULE__)
   end
-  def register(action) do
-    Registry.register(__MODULE__, action, :ok)
+  def register(host) do
+    Registry.register(__MODULE__, host, :ok)
   end
   # Callback
   @behaviour YMP.Connection

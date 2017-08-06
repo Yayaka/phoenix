@@ -6,12 +6,13 @@ defmodule YayakaSocialGraph.TimelineSubscriber do
   schema "timeline_subscribers" do
     field :user, Yayaka.User
     field :presentation, Yayaka.Service
+    field :expires, :integer
 
     field :sender, Yayaka.Service
     timestamps()
   end
 
-  @fields [:id, :user, :presentation, :sender]
+  @fields [:id, :user, :presentation, :expires, :sender]
   def changeset(event_subscriber, params) do
     event_subscriber
     |> cast(params, @fields)

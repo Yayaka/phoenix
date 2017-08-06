@@ -1,5 +1,8 @@
 use Mix.Config
 
+max_timeline_subscription_length = 43200 # 12 hours
+max_notification_subscription_length = 43200
+
 yayaka = %{
   name: "yayaka",
   version: "0.1.0",
@@ -19,7 +22,13 @@ yayaka = %{
       "event-types" => ~w(post repost reply quote follow
                           delete-post update-post),
       "content-types" => ~w(plaintext),
-      "notification-types" => ~w(follow reply repost quote)
+      "notification-types" => ~w(follow reply repost quote),
+      "parameters" => %{
+        "max-timeline-subscription-length" => %{
+          "seconds" => max_timeline_subscription_length},
+        "max-notification-subscription-length" => %{
+          "seconds" => max_notification_subscription_length}
+      }
     }]
   }
 }
@@ -62,6 +71,8 @@ config :yayaka,
   user_attributes: user_attributes,
   event_types: event_types,
   content_types: content_types,
-  notification_types: notification_types
+  notification_types: notification_types,
+  max_timeline_subscription_length: max_timeline_subscription_length,
+  max_notification_subscription_length: max_notification_subscription_length
 
 import_config "../apps/*/config/config.exs"

@@ -5,7 +5,7 @@ defmodule YayakaSocialGraph.TimelineEventTest do
 
   test "valid changeset" do
     {:ok, event} = %YayakaSocialGraph.Event{
-      social_graph: %{host: "host1", service: :social_graph},
+      repository: %{host: "host1", service: :repository},
       event_id: "event1",
       event: %{a: 1},
       sender: %{host: "host2", service: :social_graph}

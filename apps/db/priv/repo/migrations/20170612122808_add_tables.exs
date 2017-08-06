@@ -39,6 +39,7 @@ defmodule DB.Repo.Migrations.AddTables do
 
       add :user, :string
       add :social_graph, :string
+      add :expires, :integer
 
       timestamps()
     end
@@ -122,6 +123,7 @@ defmodule DB.Repo.Migrations.AddTables do
       add :id, :string, primary_key: true
       add :identity, :string
       add :user, :string
+      add :expires, :integer
 
       add :presentation, :string
 
@@ -130,17 +132,18 @@ defmodule DB.Repo.Migrations.AddTables do
     end
 
     create table(:social_graph_events) do
-      add :social_graph, :string
+      add :repository, :string
       add :event_id, :string
       add :event, :map
 
       add :sender, :string
-      timestamps()
     end
 
     create table(:timeline_events) do
       add :user, :string
       add :event_id, references(:social_graph_events)
+
+      timestamps()
     end
   end
 end
