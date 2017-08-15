@@ -252,7 +252,6 @@ defmodule YayakaSocialGraph.MessageHandler do
       expires: expires,
       sender: sender}
     changeset = TimelineSubscriber.changeset(%TimelineSubscriber{}, params)
-    IO.inspect(changeset)
     subscriber = DB.Repo.insert!(changeset)
     body = %{"subscription-id" => subscriber.id, "events" => events, "expires" => expires}
     answer = Utils.new_answer(message, body)
@@ -288,7 +287,8 @@ defmodule YayakaSocialGraph.MessageHandler do
     YMP.MessageGateway.push(answer)
   end
 
-  def handle(%{"action" => "broadcast-event"} = message) do
+  def handle(%{"action" => "broadcast-event",
+    "sender" => %{"service" => "repository"}} = message) do
     %{"event-id" => event_id,
       "identity-host" => identity_host,
       "user-id" => user_id,
@@ -316,7 +316,7 @@ defmodule YayakaSocialGraph.MessageHandler do
         "sender-host" => sender_host,
         "created-at" => created_at}
       push_event = YMP.Message.new(subscriber.social_graph.host,
-                                   "yayaka", "social-graph", "push-event",
+                                   "yayaka", "social-graph", "broadcast-event",
                                    payload, "yayaka", "social-graph")
       YMP.MessageGateway.push(push_event)
     end)
@@ -325,7 +325,8 @@ defmodule YayakaSocialGraph.MessageHandler do
     YMP.MessageGateway.push(answer)
   end
 
-  def handle(%{"action" => "push-event"} = message) do
+  def handle(%{"action" => "broadcast-event",
+    "sender" => %{"service" => "social-graph"}} = message) do
     %{"repository-host" => repository_host,
       "event-id" => event_id,
       "identity-host" => identity_host,
@@ -378,6 +379,7 @@ defmodule YayakaSocialGraph.MessageHandler do
     DB.Repo.all(query)
     |> Enum.each(fn subscription ->
       payload = %{
+        "subscription-id" => subscription.id,
         "repository-host" => sender.host,
         "event-id" => event_id,
         "identity-host" => identity_host,

@@ -39,6 +39,7 @@ defmodule YayakaRepository.MessageHandler do
         "social-graph-host" => social_graph_host} = subscription
       if repository_host == YMP.get_host() do
         payload = %{
+          "repository-host" => @host,
           "event-id" => event.id,
           "identity-host" => event.user.host,
           "user-id" => event.user.id,
@@ -48,7 +49,7 @@ defmodule YayakaRepository.MessageHandler do
           "sender-host" => event.sender.host,
           "created-at" => Utils.to_datetime(event.inserted_at)}
         message = YMP.Message.new(social_graph_host,
-                                  "yayaka", "social-graph", "push-event",
+                                  "yayaka", "social-graph", "broadcast-event",
                                   payload, "yayaka", "repiository")
         YMP.MessageGateway.request(message)
       end

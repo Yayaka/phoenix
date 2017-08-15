@@ -432,7 +432,7 @@ defmodule YayakaSocialGraph.MessageHandlerTest do
     assert subscriber.expires == new_expires
   end
 
-  test "broadcast-event" do
+  test "broadcast-event from repository" do
     user1 = %{host: @host, id: "id1"}
     user2 = %{host: @host, id: "id2"}
     user = %IdentityUser{
@@ -475,28 +475,36 @@ defmodule YayakaSocialGraph.MessageHandlerTest do
     end)
     represent_remote_host("host1")
     task1 = Task.async(fn ->
-      YMP.TestMessageHandler.register("push-event", "host1")
+      YMP.TestMessageHandler.register("broadcast-event", "host1")
       receive do
         message ->
           assert message["payload"] == event
       end
     end)
+    # Ignore the requested message
     task2 = Task.async(fn ->
-      YMP.TestMessageHandler.register("push-event")
+      YMP.TestMessageHandler.register("broadcast-event")
+      receive do
+        message -> :ok
+      end
+    end)
+    task3 = Task.async(fn ->
+      YMP.TestMessageHandler.register("broadcast-event")
       receive do
         message ->
           assert message["payload"] == event
       end
     end)
-    payload = Map.delete(event, "repository-host")
+    payload = event
     message = create_message("broadcast-event", payload, "repository")
     {:ok, answer} = request(@handler, message)
     assert = answer["payload"]["body"] == %{}
     Task.await(task1, 50)
     Task.await(task2, 50)
+    Task.await(task3, 50)
   end
 
-  test "push-event" do
+  test "broadcast-event from social-graph" do
     user1 = %{host: @host, id: "id1"}
     user2 = %{host: @host, id: "id2"}
     user = %IdentityUser{
@@ -549,11 +557,13 @@ defmodule YayakaSocialGraph.MessageHandlerTest do
       YMP.TestMessageHandler.register("push-event", "host1")
       receive do
         message ->
-          assert message["payload"] == event
+          assert message["payload"] == Map.put(event,
+                                               "subscription-id",
+                                               timeline_subscriber.id)
       end
     end)
     payload = event
-    message = create_message("push-event", payload, "social-graph")
+    message = create_message("broadcast-event", payload, "social-graph")
     {:ok, answer} = request(@handler, message)
     assert = answer["payload"]["body"] == %{}
     Task.await(task, 50)

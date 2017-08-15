@@ -63,7 +63,7 @@ defmodule YayakaRepository.MessageHandlerTest do
       end
     end)
     spawn_link(fn ->
-      YMP.TestMessageHandler.register("push-event")
+      YMP.TestMessageHandler.register("broadcast-event")
       receive do
         message ->
           send pid, message
@@ -91,6 +91,7 @@ defmodule YayakaRepository.MessageHandlerTest do
         payload = pushed["payload"]
         assert pushed["host"] == social_graph_host
         assert pushed["service"] == "social-graph"
+        assert payload["repository-host"] == body["repository-host"]
         assert payload["event-id"] == body["event-id"]
         assert payload["identity-host"] == identity_host
         assert payload["user-id"] == user.id

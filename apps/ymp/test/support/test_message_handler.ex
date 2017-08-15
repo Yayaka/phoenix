@@ -7,6 +7,9 @@ defmodule YMP.TestMessageHandler do
   def register(action, host \\ @host) do
     Registry.register(__MODULE__, {host, action}, :ok)
   end
+  def unregister(action, host \\ @host) do
+    Registry.unregister(__MODULE__, {host, action})
+  end
   def represent_remote_host(host) do
     pid = self()
     host_information = %YMP.HostInformation{
@@ -55,6 +58,7 @@ defmodule YMP.TestMessageHandler do
       spawn_link fn -> send pid, YMP.MessageGateway.request(message) end
       receive do
         ^message ->
+          YMP.TestMessageHandler.unregister(message["action"])
           if error do
             try do
               module.handle(message)
