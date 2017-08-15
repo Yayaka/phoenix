@@ -11,14 +11,14 @@ defmodule YMP.HTTPSTokenConnection do
     @scheme "https"
   end
 
-  # @impl YMP.Connection TODO Elixir v1.5
+  @impl YMP.Connection
   def check_expired(connection) do
     expires = connection.expires
     now = DateTime.utc_now() |> DateTime.to_unix()
     expires <= now
   end
 
-  # @impl YMP.Connection TODO Elixir v1.5
+  @impl YMP.Connection
   def validate(connection_protocol) do
     parameters = connection_protocol.parameters
     request_path = Map.get(parameters, "request-path")
@@ -32,7 +32,7 @@ defmodule YMP.HTTPSTokenConnection do
     and String.length(packet_path) >= 1
   end
 
-  # @impl YMP.Connection TODO Elixir v1.5
+  @impl YMP.Connection
   def connect(host_information) do
     sender_host = YMP.get_host()
     host = host_information.host
@@ -64,7 +64,7 @@ defmodule YMP.HTTPSTokenConnection do
     end
   end
 
-  # @impl YMP.Connection TODO Elixir v1.5 
+  @impl YMP.Connection
   def send_packet(connection, messages) do
     host = connection.host_information.host
     token = connection.token
