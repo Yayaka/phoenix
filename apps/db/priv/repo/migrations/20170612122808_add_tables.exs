@@ -16,22 +16,21 @@ defmodule DB.Repo.Migrations.AddTables do
 
     # Presentaion
 
-    create table(:provided_users) do
-      add :provider, :string
-      add :provided_id, :string
+    create table(:presentation_users) do
+      add :name, :string
+      add :password_hash, :string
 
       timestamps()
     end
-    create unique_index(:provided_users, [:provider, :provided_id],
-                        name: :provided_user_provider_provided_id_index)
+    create unique_index(:presentation_users, [:name])
 
     create table(:user_links) do
-      add :provided_user_id, references(:provided_users)
+      add :presentation_user_id, references(:presentation_users)
       add :user, :string
 
       timestamps()
     end
-    create unique_index(:user_links, [:provided_user_id, :user],
+    create unique_index(:user_links, [:presentation_user_id, :user],
                         name: :user_links_unique_index)
 
     create table(:timeline_subscriptions, primary_key: false) do
