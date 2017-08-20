@@ -4,7 +4,7 @@ defmodule YayakaSocialGraph.EventTest do
   alias YayakaSocialGraph.Event
 
   test "valid changeset" do
-    sender = %{host: "host1", service: :presentation}
+    sender = %{host: "host1", service: "presentation"}
     params = %{
       repository: %{host: "host2", service: :repository},
       event_id: "a",

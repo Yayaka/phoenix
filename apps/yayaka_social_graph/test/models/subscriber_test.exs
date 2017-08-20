@@ -4,7 +4,7 @@ defmodule YayakaSocialGraph.SubscriberTest do
   alias YayakaSocialGraph.Subscriber
 
   test "valid changeset" do
-    sender = %{host: "host1", service: :social_graph}
+    sender = %{host: "host1", service: "social-graph"}
     params = %{
       user: %{host: "host1", id: "user1"},
       target_user: %{host: "host1", id: "user2"},
@@ -15,7 +15,7 @@ defmodule YayakaSocialGraph.SubscriberTest do
     assert changeset.valid?
     assert get_change(changeset, :user) == %{host: "host1", id: "user1"}
     assert get_change(changeset, :target_user) ==  %{host: "host1", id: "user2"}
-    assert get_change(changeset, :social_graph).service == :social_graph
+    assert get_change(changeset, :social_graph).service == "social-graph"
     assert get_change(changeset, :sender) == sender
     assert match? {:ok, _}, DB.Repo.insert(changeset)
   end

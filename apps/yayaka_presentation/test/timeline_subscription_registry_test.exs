@@ -43,7 +43,7 @@ defmodule YayakaPresentation.TimelineSubscriptionRegistryTest do
       where: s.user == ^user,
       where: s.social_graph == ^social_graph,
       where: s.expires > ^now
-    assert subscription != DB.Repo.one(query)
+    assert subscription == DB.Repo.one(query)
     assert subscription.id == subscription_id
     assert subscription.expires == now + 1000
     assert [{self(), :ok}] ==

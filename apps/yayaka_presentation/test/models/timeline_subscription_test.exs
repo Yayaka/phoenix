@@ -13,7 +13,7 @@ defmodule YayakaPresentation.TimelineSubscriptionTest do
     assert get_change(changeset, :id) == "id1"
     assert get_change(changeset, :user) == %{host: "host1", id: "user1"}
     assert get_change(changeset, :expires) == expires
-    assert get_change(changeset, :social_graph).service == :social_graph
+    assert get_change(changeset, :social_graph).service == "social-graph"
     assert match? {:ok, _}, DB.Repo.insert(changeset)
   end
 

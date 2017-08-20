@@ -4,7 +4,7 @@ defmodule YayakaSocialGraph.TimelineSubscriberTest do
   alias YayakaSocialGraph.TimelineSubscriber
 
   test "valid changeset" do
-    sender = %{host: "host1", service: :presentation}
+    sender = %{host: "host1", service: "presentation"}
     now = DateTime.utc_now() |> DateTime.to_unix()
     params = %{
       id: "id1",
@@ -17,7 +17,7 @@ defmodule YayakaSocialGraph.TimelineSubscriberTest do
     assert changeset.valid?
     assert get_change(changeset, :id) == "id1"
     assert get_change(changeset, :user) == %{host: "host1", id: "user1"}
-    assert get_change(changeset, :presentation).service == :presentation
+    assert get_change(changeset, :presentation).service == "presentation"
     assert get_change(changeset, :expires) == now
     assert get_change(changeset, :sender) == sender
     assert match? {:ok, _}, DB.Repo.insert(changeset)

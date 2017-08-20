@@ -8,8 +8,8 @@ defmodule YayakaIdentity.AuthorizedServiceTest do
       id: "user1",
       sender: %{host: "host1", service: :presentation}
     } |> DB.Repo.insert
-    service = %{host: "host1", service: :presentation}
-    sender = %{host: "host1", service: :presentation}
+    service = %{host: "host1", service: "presentation"}
+    sender = %{host: "host1", service: "presentation"}
     params = %{
       identity_user_id: identity_user.id,
       service: service,

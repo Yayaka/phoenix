@@ -4,7 +4,7 @@ defmodule YayakaRepository.EventTest do
   alias YayakaRepository.Event
 
   test "valid changeset" do
-    sender = %{host: "host1", service: :presentation}
+    sender = %{host: "host1", service: "presentation"}
     params = %{
       id: "id1",
       user: %{host: "host1", id: "user1"},

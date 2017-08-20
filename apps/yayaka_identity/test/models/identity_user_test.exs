@@ -4,7 +4,7 @@ defmodule YayakaIdentity.IdentityUserTest do
   alias YayakaIdentity.IdentityUser
 
   test "valid changeset" do
-    sender = %{host: "host1", service: :presentation}
+    sender = %{host: "host1", service: "presentation"}
     attribute1 = %{protocol: "yayaka", key: "name",
       value: %{"text" => "name1"}, sender: sender}
     attribute2 = %{protocol: "yayaka", key: "biography",
