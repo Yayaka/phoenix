@@ -20,7 +20,9 @@ defmodule YayakaPresentation.Mixfile do
   end
 
   defp deps do
-    [{:db, in_umbrella: true},
+    [{:comeonin, "~> 4.0"},
+     {:bcrypt_elixir, "~> 0.12.0"},
+     {:db, in_umbrella: true},
      {:ymp, in_umbrella: true},
      {:yayaka, in_umbrella: true}]
   end
