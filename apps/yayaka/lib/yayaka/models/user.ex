@@ -1,6 +1,8 @@
 defmodule Yayaka.User do
   @behaviour Ecto.Type
 
+  @type t :: %{host: String.t, id: String.t}
+
   # Callbacks
   def type, do: :string
 

@@ -1,5 +1,4 @@
 defmodule YayakaPresentation.User do
-  alias Yayaka.MessageHandler.Utils
   alias YayakaPresentation.User
   alias YayakaPresentation.PresentationUser
   alias YayakaPresentation.UserLink
