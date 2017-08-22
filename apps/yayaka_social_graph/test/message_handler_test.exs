@@ -9,7 +9,9 @@ defmodule YayakaSocialGraph.MessageHandlerTest do
   alias YayakaSocialGraph.TimelineSubscriber
   alias Yayaka.MessageHandler.Utils
   import Ecto.Query
-  import YMP.TestMessageHandler, only: [request: 2, request: 3, represent_remote_host: 1]
+  import YMP.TestMessageHandler, only: [request: 2, request: 3,
+                                        represent_remote_host: 1,
+                                        with_mocks: 1, mock: 3]
 
   setup do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(DB.Repo)
@@ -50,48 +52,39 @@ defmodule YayakaSocialGraph.MessageHandlerTest do
       sender: %{host: @host, service: :presentation}}
     DB.Repo.insert!(user)
     authorization = authorize(user, :presentation)
-    represent_remote_host("host1")
-    represent_remote_host("host3")
-    spawn_link(fn ->
-      YMP.TestMessageHandler.register("fetch-user", "host1")
-      receive do
-        message ->
-          YayakaIdentity.MessageHandler.handle(message)
+    with_mocks do
+      mock "host1", "fetch-user", fn message ->
+        YayakaIdentity.MessageHandler.handle(message)
       end
-    end)
-    task = Task.async(fn ->
-      YMP.TestMessageHandler.register("add-subscriber", "host3")
-      receive do
-        message ->
-          %{"subscriber-identity-host" => host1,
-            "subscriber-user-id" => id1,
-            "publisher-identity-host" => host2,
-            "publisher-user-id" => id2} = message["payload"]
-          assert host1 == "host1"
-          assert host2 == "host2"
-          assert id1 == user.id
-          assert id2 == user2.id
-          body = %{}
-          answer = Utils.new_answer(message, body)
-          YMP.MessageGateway.push(answer)
+      mock "host3", "add-subscriber", fn message ->
+        %{"subscriber-identity-host" => host1,
+          "subscriber-user-id" => id1,
+          "publisher-identity-host" => host2,
+          "publisher-user-id" => id2} = message["payload"]
+        assert host1 == "host1"
+        assert host2 == "host2"
+        assert id1 == user.id
+        assert id2 == user2.id
+        body = %{}
+        answer = Utils.new_answer(message, body)
+        YMP.MessageGateway.push(answer)
       end
-    end)
-    payload = %{
-      "subscriber-identity-host" => "host1",
-      "subscriber-user-id" => user.id,
-      "publisher-identity-host" => "host2",
-      "publisher-user-id" => user2.id,
-      "publisher-social-graph-host" => "host3"
-    }
-    message = create_message("subscribe", payload)
-    {:ok, answer} = request(@handler, message)
-    assert answer["payload"]["body"] == %{}
-    Task.await(task, 10)
-    query = from s in Subscription,
-      where: s.user == ^%{host: "host1", id: user.id},
-      where: s.target_user == ^%{host: "host2", id: user2.id},
-      where: s.social_graph == ^%{host: "host3", service: :social_graph}
-    assert DB.Repo.aggregate(query, :count, :id) == 1
+      payload = %{
+        "subscriber-identity-host" => "host1",
+        "subscriber-user-id" => user.id,
+        "publisher-identity-host" => "host2",
+        "publisher-user-id" => user2.id,
+        "publisher-social-graph-host" => "host3"
+      }
+      message = create_message("subscribe", payload)
+      {:ok, answer} = request(@handler, message)
+      assert answer["payload"]["body"] == %{}
+      query = from s in Subscription,
+        where: s.user == ^%{host: "host1", id: user.id},
+        where: s.target_user == ^%{host: "host2", id: user2.id},
+        where: s.social_graph == ^%{host: "host3", service: :social_graph}
+      assert DB.Repo.aggregate(query, :count, :id) == 1
+    end
   end
 
   test "unsubscribe" do
@@ -105,50 +98,41 @@ defmodule YayakaSocialGraph.MessageHandlerTest do
       sender: %{host: @host, service: :presentation}}
     DB.Repo.insert!(user)
     authorization = authorize(user, :presentation)
-    represent_remote_host("host1")
-    represent_remote_host("host3")
-    spawn_link(fn ->
-      YMP.TestMessageHandler.register("fetch-user", "host1")
-      receive do
-        message ->
-          YayakaIdentity.MessageHandler.handle(message)
+    with_mocks do
+      mock "host1", "fetch-user", fn message ->
+        YayakaIdentity.MessageHandler.handle(message)
       end
-    end)
-    task = Task.async(fn ->
-      YMP.TestMessageHandler.register("remove-subscriber", "host3")
-      receive do
-        message ->
-          %{"subscriber-identity-host" => host1,
-            "subscriber-user-id" => id1,
-            "publisher-identity-host" => host2,
-            "publisher-user-id" => id2} = message["payload"]
-          assert host1 == "host1"
-          assert host2 == "host2"
-          assert id1 == user.id
-          assert id2 == user2.id
-          body = %{}
-          answer = Utils.new_answer(message, body)
-          YMP.MessageGateway.push(answer)
+      mock "host3", "remove-subscriber", fn message ->
+        %{"subscriber-identity-host" => host1,
+          "subscriber-user-id" => id1,
+          "publisher-identity-host" => host2,
+          "publisher-user-id" => id2} = message["payload"]
+        assert host1 == "host1"
+        assert host2 == "host2"
+        assert id1 == user.id
+        assert id2 == user2.id
+        body = %{}
+        answer = Utils.new_answer(message, body)
+        YMP.MessageGateway.push(answer)
       end
-    end)
-    subscription = %Subscription{
-      user: %{host: "host1", id: user.id},
-      target_user: %{host: "host2", id: user2.id},
-      social_graph: %{host: "host3", service: :social_graph},
-      sender: %{host: @host, service: :presentation}}
-    subscription = DB.Repo.insert!(subscription)
-    payload = %{
-      "subscriber-identity-host" => "host1",
-      "subscriber-user-id" => user.id,
-      "publisher-identity-host" => "host2",
-      "publisher-user-id" => user2.id,
-      "publisher-social-graph-host" => "host3"
-    }
-    message = create_message("unsubscribe", payload)
-    {:ok, answer} = request(@handler, message)
-    assert answer["payload"]["body"] == %{}
-    Task.await(task, 10)
-    assert nil == DB.Repo.get(Subscription, subscription.id)
+      subscription = %Subscription{
+        user: %{host: "host1", id: user.id},
+        target_user: %{host: "host2", id: user2.id},
+        social_graph: %{host: "host3", service: :social_graph},
+        sender: %{host: @host, service: :presentation}}
+      subscription = DB.Repo.insert!(subscription)
+      payload = %{
+        "subscriber-identity-host" => "host1",
+        "subscriber-user-id" => user.id,
+        "publisher-identity-host" => "host2",
+        "publisher-user-id" => user2.id,
+        "publisher-social-graph-host" => "host3"
+      }
+      message = create_message("unsubscribe", payload)
+      {:ok, answer} = request(@handler, message)
+      assert answer["payload"]["body"] == %{}
+      assert nil == DB.Repo.get(Subscription, subscription.id)
+    end
   end
 
   test "add-subscriber" do
@@ -163,27 +147,25 @@ defmodule YayakaSocialGraph.MessageHandlerTest do
     DB.Repo.insert!(user)
     authorization = authorize(user, :social_graph)
     represent_remote_host("host1")
-    spawn_link(fn ->
-      YMP.TestMessageHandler.register("fetch-user", "host1")
-      receive do
-        message ->
-          YayakaIdentity.MessageHandler.handle(message)
+    with_mocks do
+      mock "host1", "fetch-user", fn message ->
+        YayakaIdentity.MessageHandler.handle(message)
       end
-    end)
-    payload = %{
-      "subscriber-identity-host" => "host1",
-      "subscriber-user-id" => user.id,
-      "publisher-identity-host" => "host2",
-      "publisher-user-id" => user2.id,
-    }
-    message = create_message("add-subscriber", payload, "social-graph")
-    {:ok, answer} = request(@handler, message)
-    assert answer["payload"]["body"] == %{}
-    query = from s in Subscriber,
-      where: s.user == ^%{host: "host1", id: user.id},
-      where: s.target_user == ^%{host: "host2", id: user2.id},
-      where: s.social_graph == ^%{host: @host, service: :social_graph}
-    assert DB.Repo.aggregate(query, :count, :id) == 1
+      payload = %{
+        "subscriber-identity-host" => "host1",
+        "subscriber-user-id" => user.id,
+        "publisher-identity-host" => "host2",
+        "publisher-user-id" => user2.id,
+      }
+      message = create_message("add-subscriber", payload, "social-graph")
+      {:ok, answer} = request(@handler, message)
+      assert answer["payload"]["body"] == %{}
+      query = from s in Subscriber,
+        where: s.user == ^%{host: "host1", id: user.id},
+        where: s.target_user == ^%{host: "host2", id: user2.id},
+        where: s.social_graph == ^%{host: @host, service: :social_graph}
+      assert DB.Repo.aggregate(query, :count, :id) == 1
+    end
   end
 
   test "remove-subscriber" do
@@ -198,33 +180,31 @@ defmodule YayakaSocialGraph.MessageHandlerTest do
     DB.Repo.insert!(user)
     authorization = authorize(user, :social_graph)
     represent_remote_host("host1")
-    spawn_link(fn ->
-      YMP.TestMessageHandler.register("fetch-user", "host1")
-      receive do
-        message ->
-          YayakaIdentity.MessageHandler.handle(message)
+    with_mocks do
+      mock "host1", "fetch-user", fn message ->
+        YayakaIdentity.MessageHandler.handle(message)
       end
-    end)
-    subscriber = %Subscriber{
-      user: %{host: "host1", id: user.id},
-      target_user: %{host: "host2", id: user2.id},
-      social_graph: %{host: @host, service: :social_graph},
-      sender: %{host: @host, service: :social_graph}}
-    subscriber = DB.Repo.insert!(subscriber)
-    payload = %{
-      "subscriber-identity-host" => "host1",
-      "subscriber-user-id" => user.id,
-      "publisher-identity-host" => "host2",
-      "publisher-user-id" => user2.id,
-    }
-    message = create_message("remove-subscriber", payload, "social-graph")
-    {:ok, answer} = request(@handler, message)
-    assert answer["payload"]["body"] == %{}
-    query = from s in Subscriber,
-      where: s.user == ^%{host: "host1", id: user.id},
-      where: s.target_user == ^%{host: "host2", id: user2.id},
-      where: s.social_graph == ^%{host: @host, service: :social_graph}
-    assert nil == DB.Repo.get(Subscriber, subscriber.id)
+      subscriber = %Subscriber{
+        user: %{host: "host1", id: user.id},
+        target_user: %{host: "host2", id: user2.id},
+        social_graph: %{host: @host, service: :social_graph},
+        sender: %{host: @host, service: :social_graph}}
+      subscriber = DB.Repo.insert!(subscriber)
+      payload = %{
+        "subscriber-identity-host" => "host1",
+        "subscriber-user-id" => user.id,
+        "publisher-identity-host" => "host2",
+        "publisher-user-id" => user2.id,
+      }
+      message = create_message("remove-subscriber", payload, "social-graph")
+      {:ok, answer} = request(@handler, message)
+      assert answer["payload"]["body"] == %{}
+      query = from s in Subscriber,
+        where: s.user == ^%{host: "host1", id: user.id},
+        where: s.target_user == ^%{host: "host2", id: user2.id},
+        where: s.social_graph == ^%{host: @host, service: :social_graph}
+      assert nil == DB.Repo.get(Subscriber, subscriber.id)
+    end
   end
 
   test "fetch-user-relations" do
@@ -466,42 +446,24 @@ defmodule YayakaSocialGraph.MessageHandlerTest do
         ]},
       "sender-host" => @host,
       "created-at" => DateTime.utc_now() |> DateTime.to_iso8601()}
-    spawn_link(fn ->
-      YMP.TestMessageHandler.register("fetch-user")
-      receive do
-        message ->
-          YayakaIdentity.MessageHandler.handle(message)
+    with_mocks do
+      mock @host, "fetch-user", fn message ->
+        YayakaIdentity.MessageHandler.handle(message)
       end
-    end)
-    represent_remote_host("host1")
-    task1 = Task.async(fn ->
-      YMP.TestMessageHandler.register("broadcast-event", "host1")
-      receive do
-        message ->
-          assert message["payload"] == event
+      mock "host1", "broadcast-event", fn message ->
+        assert message["payload"] == event
       end
-    end)
-    # Ignore the requested message
-    task2 = Task.async(fn ->
-      YMP.TestMessageHandler.register("broadcast-event")
-      receive do
-        message -> :ok
+      mock @host, "broadcast-event", fn message ->
+        # Ignore the requested message
       end
-    end)
-    task3 = Task.async(fn ->
-      YMP.TestMessageHandler.register("broadcast-event")
-      receive do
-        message ->
-          assert message["payload"] == event
+      mock @host, "broadcast-event", fn message ->
+        assert message["payload"] == event
       end
-    end)
-    payload = event
-    message = create_message("broadcast-event", payload, "repository")
-    {:ok, answer} = request(@handler, message)
-    assert = answer["payload"]["body"] == %{}
-    Task.await(task1, 50)
-    Task.await(task2, 50)
-    Task.await(task3, 50)
+      payload = event
+      message = create_message("broadcast-event", payload, "repository")
+      {:ok, answer} = request(@handler, message)
+      assert = answer["payload"]["body"] == %{}
+    end
   end
 
   test "broadcast-event from social-graph" do

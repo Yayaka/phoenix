@@ -1,6 +1,6 @@
 defmodule YayakaPresentation.EventTest do
   use ExUnit.Case
-  import YMP.TestMessageHandler, only: [represent_remote_host: 1]
+  import YMP.TestMessageHandler, only: [with_mocks: 1, mock: 3]
   alias Yayaka.MessageHandler.Utils
   alias YayakaPresentation.Event
 
@@ -22,23 +22,19 @@ defmodule YayakaPresentation.EventTest do
             "body" => %{"text" => "aaa"}}]
       }}
     created_event_id = "created-event-id"
-    represent_remote_host(repository_host)
-    task = Task.async(fn ->
-      YMP.TestMessageHandler.register("create-event", repository_host)
-      receive do
-        message ->
-          assert message["payload"]["identity-host"] == user.host
-          assert message["payload"]["user-id"] == user.id
-          assert message["payload"]["protocol"] == event["protocol"]
-          assert message["payload"]["type"] == event["type"]
-          assert message["payload"]["body"] == event["body"]
-          body = %{"event-id" => created_event_id}
-          answer = Utils.new_answer(message, body)
-          YMP.MessageGateway.push(answer)
+    with_mocks do
+      mock repository_host, "create-event", fn message ->
+        assert message["payload"]["identity-host"] == user.host
+        assert message["payload"]["user-id"] == user.id
+        assert message["payload"]["protocol"] == event["protocol"]
+        assert message["payload"]["type"] == event["type"]
+        assert message["payload"]["body"] == event["body"]
+        body = %{"event-id" => created_event_id}
+        answer = Utils.new_answer(message, body)
+        YMP.MessageGateway.push(answer)
       end
-    end)
-    assert {:ok, created_event_id} == Event.create(user, repository_host, event)
-    assert :ok == Task.await(task)
+      assert {:ok, created_event_id} == Event.create(user, repository_host, event)
+    end
   end
 
   test "fetch" do
@@ -56,18 +52,14 @@ defmodule YayakaPresentation.EventTest do
       "sender-host" => "host3",
       "created-at" => DateTime.utc_now() |> DateTime.to_iso8601()}
     event_id = "id1"
-    represent_remote_host(repository_host)
-    task = Task.async(fn ->
-      YMP.TestMessageHandler.register("fetch-event", repository_host)
-      receive do
-        message ->
-          assert message["payload"]["event-id"] == event_id
-          body = event
-          answer = Utils.new_answer(message, body)
-          YMP.MessageGateway.push(answer)
+    with_mocks do
+      mock repository_host, "fetch-event", fn message ->
+        assert message["payload"]["event-id"] == event_id
+        body = event
+        answer = Utils.new_answer(message, body)
+        YMP.MessageGateway.push(answer)
       end
-    end)
-    assert {:ok, event} == Event.fetch(repository_host, event_id)
-    assert :ok == Task.await(task)
+      assert {:ok, event} == Event.fetch(repository_host, event_id)
+    end
   end
 end
