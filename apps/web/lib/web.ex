@@ -39,6 +39,10 @@ defmodule Web do
       import Web.Router.Helpers
       import Web.ErrorHelpers
       import Web.Gettext
+
+      def get_user(conn) do
+        Guardian.Plug.current_resource(conn)
+      end
     end
   end
 

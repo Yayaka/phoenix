@@ -1,1 +1,3 @@
-/* This file is for your main application css. */
+.ui.message:empty {
+  display: none;
+}

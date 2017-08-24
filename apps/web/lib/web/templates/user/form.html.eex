@@ -1,0 +1,13 @@
+<div class="ui segment">
+  <%= form_for @conn, @action, [as: :user, method: :post, class: "ui form"], fn f -> %>
+    <div class="field">
+      <%= label f, :name, "Name" %>
+      <%= text_input f, :name %>
+    </div>
+    <div class="field">
+      <%= label f, :password, "Password" %>
+      <%= password_input f, :password %>
+    </div>
+    <%= submit "Create", class: "ui primary button" %>
+  <% end %>
+</div>

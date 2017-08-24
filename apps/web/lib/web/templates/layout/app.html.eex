@@ -9,27 +9,47 @@
 
     <title>Hello Web!</title>
     <link rel="stylesheet" href="<%= static_path(@conn, "/css/app.css") %>">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/semantic-ui/2.2.10/semantic.min.css" integrity="sha256-5+W3JHnvGYIJkVxUBsw+jBi9+pOlu9enPX3vZapXj5M=" crossorigin="anonymous">
   </head>
 
   <body>
-    <div class="container">
-      <header class="header">
-        <nav role="navigation">
-          <ul class="nav nav-pills pull-right">
-            <li><a href="http://www.phoenixframework.org/docs">Get Started</a></li>
-          </ul>
-        </nav>
-        <span class="logo"></span>
-      </header>
+    <div class="ui container">
+      <div class="ui large menu">
+        <a class="item" href="<%= page_path(@conn, :index) %>">
+          Yayaka Reference
+        </a>
+        <div class="right menu">
+          <% user = get_user(@conn) %>
+          <%= if user do %>
+            <div class="ui dropdown item">
+              <div class="text"><%= user["name"] %></div>
+              <i class="dropdown icon"></i>
+              <div class="menu">
+                <a class="item" href="<%= session_path(@conn, :delete) %>">Sign out</a>
+              </div>
+            </div>
+          <% else %>
+            <a class="item" href="<%= page_path(@conn, :login) %>">Sign in</a>
+            <a class="item" href="<%= user_path(@conn, :new) %>">Sign up</a>
+          <% end %>
+        </div>
+      </div>
 
-      <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
-      <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
+      <p class="ui message" role="alert"><%= get_flash(@conn, :info) %></p>
+      <p class="ui message" role="alert"><%= get_flash(@conn, :error) %></p>
 
-      <main role="main">
-        <%= render @view_module, @view_template, assigns %>
+      <main role="main" class="ui basic segment">
+        <div class="ui container">
+          <%= render @view_module, @view_template, assigns %>
+        </div>
       </main>
 
-    </div> <!-- /container -->
+    </div>
     <script src="<%= static_path(@conn, "/js/app.js") %>"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/semantic-ui/2.2.10/semantic.min.js" integrity="sha256-97Q90i72uoJfYtVnO2lQcLjbjBySZjLHx50DYhCBuJo=" crossorigin="anonymous"></script>
+    <script>
+      $('.ui.dropdown').dropdown();
+    </script>
   </body>
 </html>

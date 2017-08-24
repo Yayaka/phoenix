@@ -7,6 +7,8 @@ defmodule Web.Router do
     plug :fetch_flash
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug Guardian.Plug.VerifySession
+    plug Guardian.Plug.LoadResource
   end
 
   pipeline :api do
@@ -22,6 +24,11 @@ defmodule Web.Router do
     pipe_through :browser
 
     get "/", PageController, :index
+    resources "/users", UserController, only: [:new, :create]
+
+    get "/login", PageController, :login
+    post "/login", SessionController, :create
+    get "/logout", SessionController, :delete
   end
 
   scope "/api", Web do

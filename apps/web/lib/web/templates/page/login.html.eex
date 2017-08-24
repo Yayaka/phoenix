@@ -1,0 +1,3 @@
+<h2>Sign in</h2>
+
+<%= render Web.UserView, "form.html", conn: @conn, action: session_path(@conn, :create) %>

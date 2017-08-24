@@ -34,6 +34,7 @@ defmodule Web.Mixfile do
   defp deps do
     [{:db, in_umbrella: true},
      {:ymp, in_umbrella: true},
+     {:yayaka_presentation, in_umbrella: true},
      {:bypass, "~> 0.7", only: :test},
      {:guardian, "~> 0.14"},
      {:phoenix, "~> 1.3.0-rc", override: true},
