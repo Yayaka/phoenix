@@ -10,7 +10,7 @@ if Mix.env == :test do
   config :ymp, service_protocols: %{
     "test" => %{module: YMP.TestMessageHandler},
     "test-answer-validation" => %{module: YMP.TestMessageHandler, answer_validation: true},
-    "yayaka" => %{module: YMP.TestMessageHandler}}
+    "yayaka" => %{module: YMP.TestMessageHandler, answer_validation: true}}
 end
 
 config :ymp, :workers,

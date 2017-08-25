@@ -124,10 +124,15 @@ defmodule YMP.TestMessageHandler do
 
   @impl YMP.AnswerValidator
   def validate_answer(message) do
-    if Map.get(message["payload"], "invalid", false) do
-      :error
-    else
-      :ok
+    case message["protocol"] do
+      "test-answer-validation" ->
+        if Map.get(message["payload"], "invalid", false) do
+          :error
+        else
+          :ok
+        end
+      "yayaka" ->
+        Yayaka.MessageHandler.validate_answer(message)
     end
   end
 end

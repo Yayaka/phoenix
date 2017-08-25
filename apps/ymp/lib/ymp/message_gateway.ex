@@ -44,7 +44,6 @@ defmodule YMP.MessageGateway do
       {:message, message} ->
         case Map.get(@service_protocols, message["protocol"]) do
           %{module: module, answer_validation: true} ->
-            IO.inspect(apply(module, :validate_answer, [message]))
             case apply(module, :validate_answer, [message]) do
               :ok -> {:ok, message}
               :error -> {:error, message}
