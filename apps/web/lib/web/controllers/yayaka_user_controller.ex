@@ -30,12 +30,15 @@ defmodule Web.YayakaUserController do
     presentation_user = get_user(conn)
     user = get_yayaka_user(conn)
     actions = case {presentation_user, user} do
-      {nil, _} -> [:check_user_name_availability, :fetch_user]
-      {_, nil} -> [:create_user, :check_user_name_availability, :fetch_user]
+      {nil, _} ->
+        [:check_user_name_availability, :fetch_user, :fetch_user_by_name]
+      {_, nil} ->
+        [:create_user, :check_user_name_availability, :fetch_user, :fetch_user_by_name]
       _ ->
         [:create_user, :check_user_name_availability,
          :update_user_name, :update_user_attributes,
-         :fetch_user, :get_token, :authenticate_user,
+         :fetch_user, :fetch_user_by_name,
+         :get_token, :authenticate_user,
          :authorize_service, :revoke_service_authorization]
     end
     render conn, "index.html", actions: actions
@@ -116,6 +119,24 @@ defmodule Web.YayakaUserController do
         host: #{identity_host}
         id: #{user_id}
         name: #{user_name}
+        attributes: #{inspect attributes}
+        authorize_service: #{inspect authorize_services}
+        """)
+      _ ->
+        error(conn)
+    end
+  end
+
+  def fetch_user_by_name(conn, %{"params" => params}) do
+    %{"host" => identity_host,
+      "name" => name} = params
+    case User.fetch_by_name(identity_host, name) do
+      {:ok, user_id, attributes, authorize_services} ->
+        ok(conn, """
+        user is fetched.
+        host: #{identity_host}
+        id: #{user_id}
+        name: #{name}
         attributes: #{inspect attributes}
         authorize_service: #{inspect authorize_services}
         """)

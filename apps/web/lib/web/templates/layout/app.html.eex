@@ -35,8 +35,8 @@
         </div>
       </div>
 
-      <p class="ui message" role="alert"><%= get_flash(@conn, :info) %></p>
-      <p class="ui message" role="alert"><%= get_flash(@conn, :error) %></p>
+      <pre class="ui message" role="alert"><%= get_flash(@conn, :info) %></pre>
+      <pre class="ui message" role="alert"><%= get_flash(@conn, :error) %></pre>
 
       <main role="main" class="ui basic segment">
         <div class="ui container">

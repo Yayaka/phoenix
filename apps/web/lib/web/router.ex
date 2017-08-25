@@ -37,6 +37,7 @@ defmodule Web.Router do
       post "/update-user-name", YayakaUserController, :update_user_name
       post "/update-user-attributes", YayakaUserController, :update_user_attributes
       post "/fetch-user", YayakaUserController, :fetch_user
+      post "/fetch-user-by-name", YayakaUserController, :fetch_user_by_name
       post "/get-token", YayakaUserController, :get_token
       post "/authenticate-user", YayakaUserController, :authenticate_user
       post "/authorize-service", YayakaUserController, :authorize_service

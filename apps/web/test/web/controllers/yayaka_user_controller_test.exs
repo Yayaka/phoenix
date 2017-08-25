@@ -3,13 +3,14 @@ defmodule Web.YayakaUserControllerTest do
   import YMP.TestMessageHandler, only: [with_mocks: 1, mock: 3]
   alias Yayaka.MessageHandler.Utils
 
-  @user %{host: "host1", id: "id1"}
+  @user %{host: "hostx", id: "idx"}
 
   defmodule Macros do
-    defmacro with_error(action, do: block) do
+    defmacro with_error(host \\ nil, action, do: block) do
       quote do
+        host = if not is_nil(unquote(host)), do: unquote(host), else: @user.host
         with_mocks do
-          mock @user.host, unquote(action), fn message ->
+          mock host, unquote(action), fn message ->
             payload = %{"status" => "error", "body" => %{}}
             answer = YMP.Message.new_answer(message, payload)
             YMP.MessageGateway.push(answer)
@@ -45,6 +46,7 @@ defmodule Web.YayakaUserControllerTest do
     refute response =~ "Update user name"
     refute response =~ "Update user attributes"
     assert response =~ "Fetch user"
+    assert response =~ "Fetch user by name"
     refute response =~ "Get token"
     refute response =~ "Authenticate user"
     refute response =~ "Authorize service"
@@ -60,6 +62,7 @@ defmodule Web.YayakaUserControllerTest do
     refute response =~ "Update user name"
     refute response =~ "Update user attributes"
     assert response =~ "Fetch user"
+    assert response =~ "Fetch user by name"
     refute response =~ "Get token"
     refute response =~ "Authenticate user"
     refute response =~ "Authorize service"
@@ -75,6 +78,7 @@ defmodule Web.YayakaUserControllerTest do
     assert response =~ "Update user name"
     assert response =~ "Update user attributes"
     assert response =~ "Fetch user"
+    assert response =~ "Fetch user by name"
     assert response =~ "Get token"
     assert response =~ "Authenticate user"
     assert response =~ "Authorize service"
@@ -107,7 +111,7 @@ defmodule Web.YayakaUserControllerTest do
         "name" => user_name,
         "attributes" => Poison.encode!(attributes)
       }
-      conn = sign_up(conn)
+      conn = sign_up(conn, true)
              |> post(yayaka_user_path(conn, :create_user), params: params)
       assert redirected_to(conn) == yayaka_user_path(conn, :index)
       assert get_flash(conn, :info) =~ "created"
@@ -116,7 +120,7 @@ defmodule Web.YayakaUserControllerTest do
 
   test "POST /yayaka/create-user fails", %{conn: conn} do
     import __MODULE__.Macros
-    with_error "create-user" do
+    with_error "host1", "create-user" do
       params = %{
         "host" => "host1",
         "name" => "name1",
@@ -157,11 +161,10 @@ defmodule Web.YayakaUserControllerTest do
 
   test "POST /yayaka/check-user-name-availability fails", %{conn: conn} do
     import __MODULE__.Macros
-    with_error "check-user-name-availability" do
+    with_error "host1", "check-user-name-availability" do
       params = %{
         "host" => "host1",
-        "name" => "name1",
-        "attributes" => Poison.encode!([])
+        "name" => "name1"
       }
       conn = sign_up(conn)
              |> post yayaka_user_path(conn, :check_user_name_availability), params: params
@@ -186,8 +189,6 @@ defmodule Web.YayakaUserControllerTest do
         YMP.MessageGateway.push(answer)
       end
       params = %{
-        "host" => @user.host,
-        "id" => @user.id,
         "name" => new_user_name
       }
       conn = sign_up(conn)
@@ -199,9 +200,8 @@ defmodule Web.YayakaUserControllerTest do
 
   test "POST /yayaka/update-user-name fails", %{conn: conn} do
     import __MODULE__.Macros
-    with_error "update-user-name" do
+    with_error @user.host, "update-user-name" do
       params = %{
-        "host" => "host1",
         "name" => "name1"
       }
       conn = sign_up(conn)
@@ -291,10 +291,55 @@ defmodule Web.YayakaUserControllerTest do
       params = %{
         "host" => @user.host,
         "id" => @user.id,
-        "attributes" => Poison.encode!([])
       }
       conn = sign_up(conn)
              |> post yayaka_user_path(conn, :fetch_user), params: params
+      assert redirected_to(conn) == yayaka_user_path(conn, :index)
+      assert get_flash(conn, :error) =~ "error"
+    end
+  end
+
+  # fetch-user-by-name
+
+  test "POST /yayaka/fetch-user-by-name", %{conn: conn} do
+    user_name = "name1"
+    attributes = [
+      %{"protocol" => "yayaka",
+        "type" => "name",
+        "value" => %{"text" => "Name 2"}}]
+    authorized_services = [
+      %{"host" => "host1", "service" => "presentation"},
+      %{"host" => "host1", "service" => "repository"}]
+    with_mocks do
+      mock @user.host, "fetch-user-by-name", fn message ->
+        assert message["payload"]["user-name"] == user_name
+        body = %{
+          "user-id" => @user.id,
+          "attributes" => attributes,
+          "authorized-services" => authorized_services}
+        answer = Utils.new_answer(message, body)
+        YMP.MessageGateway.push(answer)
+      end
+      params = %{
+        "host" => @user.host,
+        "name" => user_name
+      }
+      conn = sign_up(conn)
+             |> post yayaka_user_path(conn, :fetch_user_by_name), params: params
+      assert redirected_to(conn) == yayaka_user_path(conn, :index)
+      assert get_flash(conn, :info) =~ @user.id
+    end
+  end
+
+  test "POST /yayaka/fetch-user-by-name fails", %{conn: conn} do
+    import __MODULE__.Macros
+    with_error "fetch-user-by-name" do
+      params = %{
+        "host" => @user.host,
+        "name" => "name1",
+      }
+      conn = sign_up(conn)
+             |> post yayaka_user_path(conn, :fetch_user_by_name), params: params
       assert redirected_to(conn) == yayaka_user_path(conn, :index)
       assert get_flash(conn, :error) =~ "error"
     end

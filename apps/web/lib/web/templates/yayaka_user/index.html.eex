@@ -75,6 +75,22 @@
     <% end %>
   </div>
 <% end %>
+<%= if :fetch_user_by_name in @actions do %>
+  <div class="ui segment">
+    <h3>Fetch user by name</h3>
+    <%= form_for @conn, yayaka_user_path(@conn, :fetch_user_by_name), opts, fn f -> %>
+      <div class="field">
+        <%= label f, :host, "Host" %>
+        <%= text_input f, :host %>
+      </div>
+      <div class="field">
+        <%= label f, :name, "Name" %>
+        <%= text_input f, :name %>
+      </div>
+      <%= submit "Fetch", class: "ui primary button" %>
+    <% end %>
+  </div>
+<% end %>
 <%= if :get_token in @actions do %>
   <div class="ui segment">
     <h3>Get token</h3>
