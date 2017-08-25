@@ -210,6 +210,34 @@ defmodule YayakaPresentation.UserTest do
     end
   end
 
+  test "fetch_by_name" do
+    user = %{host: "host1", id: "id1"}
+    user_name = "name1"
+    attributes = [
+      %{"protocol" => "yayaka",
+        "type" => "name",
+        "value" => %{"text" => "Name 2"}}]
+    authorized_services = [
+      %{"host" => "host2",
+        "service" => "presentation",
+        "sender-host" => "host3"}]
+    with_mocks do
+      mock user.host, "fetch-user-by-name", fn message ->
+        assert message["payload"]["user-name"] == user_name
+        body = %{
+          "user-id" => user.id,
+          "attributes" => attributes,
+          "authorized-services" => authorized_services}
+        answer = Utils.new_answer(message, body)
+        YMP.MessageGateway.push(answer)
+      end
+      assert {:ok,
+        user.id,
+        attributes,
+        authorized_services} == User.fetch_by_name(user.host, user_name)
+    end
+  end
+
   test "get_token" do
     user = %{host: "host1", id: "id1"}
     presentation_host = "host2"

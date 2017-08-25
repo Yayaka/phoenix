@@ -64,10 +64,10 @@ defmodule YayakaPresentation.User do
     payload = %{
       "user-name" => name,
       "attributes" => attributes}
-    create_user = YMP.Message.new(identity_host,
-                                  "yayaka", "identity", "create-user",
-                                  payload, "yayaka", "presentation")
-    with {:ok, answer} <- YMP.MessageGateway.request(create_user),
+    message = YMP.Message.new(identity_host,
+                              "yayaka", "identity", "create-user",
+                              payload, "yayaka", "presentation")
+    with {:ok, answer} <- YMP.MessageGateway.request(message),
          %{"user-id" => user_id,
            "user-name" => user_name} <- answer["payload"]["body"],
          user <- %{host: identity_host, id: user_id},
@@ -83,8 +83,8 @@ defmodule YayakaPresentation.User do
     payload = %{
       "user-name" => name}
     message = YMP.Message.new(identity_host,
-                            "yayaka", "identity", "check-user-name-availability",
-                            payload, "yayaka", "presentation")
+                              "yayaka", "identity", "check-user-name-availability",
+                              payload, "yayaka", "presentation")
     case YMP.MessageGateway.request(message) do
       {:ok, answer} ->
         %{"availability" => availability} = answer["payload"]["body"]
@@ -101,8 +101,8 @@ defmodule YayakaPresentation.User do
       "user-id" => user.id,
       "user-name" => new_name}
     message = YMP.Message.new(user.host,
-                            "yayaka", "identity", "update-user-name",
-                            payload, "yayaka", "presentation")
+                              "yayaka", "identity", "update-user-name",
+                              payload, "yayaka", "presentation")
     case YMP.MessageGateway.request(message) do
       {:ok, answer} ->
         %{"user-name" => user_name} = answer["payload"]["body"]
@@ -119,8 +119,8 @@ defmodule YayakaPresentation.User do
       "user-id" => user.id,
       "attributes" => attributes}
     message = YMP.Message.new(user.host,
-                            "yayaka", "identity", "update-user-attributes",
-                            payload, "yayaka", "presentation")
+                              "yayaka", "identity", "update-user-attributes",
+                              payload, "yayaka", "presentation")
     case YMP.MessageGateway.request(message) do
       {:ok, answer} ->
         :ok
@@ -133,10 +133,10 @@ defmodule YayakaPresentation.User do
   def fetch(user) do
     payload = %{
       "user-id" => user.id}
-    check = YMP.Message.new(user.host,
-                            "yayaka", "identity", "fetch-user",
-                            payload, "yayaka", "presentation")
-    case YMP.MessageGateway.request(check) do
+    message = YMP.Message.new(user.host,
+                              "yayaka", "identity", "fetch-user",
+                              payload, "yayaka", "presentation")
+    case YMP.MessageGateway.request(message) do
       {:ok, answer} ->
         %{"user-name" => user_name,
           "attributes" => attributes,
@@ -147,15 +147,33 @@ defmodule YayakaPresentation.User do
     end
   end
 
+  @spec fetch_by_name(host, user) :: {:ok, user_id, attributes, [Yayaka.Service.t]} | :error
+  def fetch_by_name(identity_host, name) do
+    payload = %{
+      "user-name" => name}
+    message = YMP.Message.new(identity_host,
+                              "yayaka", "identity", "fetch-user-by-name",
+                              payload, "yayaka", "presentation")
+    case YMP.MessageGateway.request(message) do
+      {:ok, answer} ->
+        %{"user-id" => user_id,
+          "attributes" => attributes,
+          "authorized-services" => authorized_services} = answer["payload"]["body"]
+        {:ok, user_id, attributes, authorized_services}
+      _ ->
+        :error
+    end
+  end
+
   @spec get_token(user, host) :: {:ok, token, expires} | :error
   def get_token(user, presentation_host) do
     payload = %{
       "user-id" => user.id,
       "presentation-host" => presentation_host}
-    check = YMP.Message.new(user.host,
-                            "yayaka", "identity", "get-token",
-                            payload, "yayaka", "presentation")
-    case YMP.MessageGateway.request(check) do
+    message = YMP.Message.new(user.host,
+                              "yayaka", "identity", "get-token",
+                              payload, "yayaka", "presentation")
+    case YMP.MessageGateway.request(message) do
       {:ok, answer} ->
         %{"token" => token,
           "expires" => expires} = answer["payload"]["body"]
@@ -170,10 +188,10 @@ defmodule YayakaPresentation.User do
     payload = %{
       "user-id" => user.id,
       "token" => token}
-    check = YMP.Message.new(user.host,
-                            "yayaka", "identity", "authenticate-user",
-                            payload, "yayaka", "presentation")
-    with {:ok, _answer} <- YMP.MessageGateway.request(check),
+    message = YMP.Message.new(user.host,
+                              "yayaka", "identity", "authenticate-user",
+                              payload, "yayaka", "presentation")
+    with {:ok, _answer} <- YMP.MessageGateway.request(message),
          {:ok, _link} <- insert_user_link(presentation_user, user) do
       :ok
     else
@@ -188,10 +206,10 @@ defmodule YayakaPresentation.User do
       "user-id" => user.id,
       "host" => service.host,
       "service" => service.service}
-    check = YMP.Message.new(user.host,
-                            "yayaka", "identity", "authorize-service",
-                            payload, "yayaka", "presentation")
-    case YMP.MessageGateway.request(check) do
+    message = YMP.Message.new(user.host,
+                              "yayaka", "identity", "authorize-service",
+                              payload, "yayaka", "presentation")
+    case YMP.MessageGateway.request(message) do
       {:ok, _answer} -> :ok
       _ -> :error
     end
@@ -204,10 +222,10 @@ defmodule YayakaPresentation.User do
       "user-id" => user.id,
       "host" => service.host,
       "service" => service.service}
-    check = YMP.Message.new(user.host,
-                            "yayaka", "identity", "revoke-service-authorization",
-                            payload, "yayaka", "presentation")
-    case YMP.MessageGateway.request(check) do
+    message = YMP.Message.new(user.host,
+                              "yayaka", "identity", "revoke-service-authorization",
+                              payload, "yayaka", "presentation")
+    case YMP.MessageGateway.request(message) do
       {:ok, _answer} -> :ok
       _ -> :error
     end
