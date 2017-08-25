@@ -91,6 +91,17 @@ defmodule YayakaPresentation.UserTest do
       {:ok, true, suggestions} =
         User.check_user_name_availability(identity_host, user_name)
     end
+    with_mocks do
+      mock identity_host, "check-user-name-availability", fn message ->
+        assert message["payload"]["user-name"] == user_name
+        body = %{
+          "availability" => true}
+        answer = Utils.new_answer(message, body)
+        YMP.MessageGateway.push(answer)
+      end
+      {:ok, true, []} =
+        User.check_user_name_availability(identity_host, user_name)
+    end
   end
 
   test "check_user_name_availability when the name is not available" do
@@ -107,6 +118,17 @@ defmodule YayakaPresentation.UserTest do
         YMP.MessageGateway.push(answer)
       end
       {:ok, false, suggestions} =
+        User.check_user_name_availability(identity_host, user_name)
+    end
+    with_mocks do
+      mock identity_host, "check-user-name-availability", fn message ->
+        assert message["payload"]["user-name"] == user_name
+        body = %{
+          "availability" => false}
+        answer = Utils.new_answer(message, body)
+        YMP.MessageGateway.push(answer)
+      end
+      {:ok, false, []} =
         User.check_user_name_availability(identity_host, user_name)
     end
   end
@@ -126,6 +148,18 @@ defmodule YayakaPresentation.UserTest do
         YMP.MessageGateway.push(answer)
       end
       assert {:ok, new_user_name, suggestions} ==
+        User.update_user_name(user, new_user_name)
+    end
+    with_mocks do
+      mock user.host, "update-user-name", fn message ->
+        assert message["payload"]["user-id"] == user.id
+        assert message["payload"]["user-name"] == new_user_name
+        body = %{
+          "user-name" => new_user_name}
+        answer = Utils.new_answer(message, body)
+        YMP.MessageGateway.push(answer)
+      end
+      assert {:ok, new_user_name, []} ==
         User.update_user_name(user, new_user_name)
     end
   end

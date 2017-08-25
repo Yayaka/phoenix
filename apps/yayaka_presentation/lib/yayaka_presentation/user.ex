@@ -87,8 +87,8 @@ defmodule YayakaPresentation.User do
                             payload, "yayaka", "presentation")
     case YMP.MessageGateway.request(message) do
       {:ok, answer} ->
-        %{"availability" => availability,
-          "suggestions" => suggestions} = answer["payload"]["body"]
+        %{"availability" => availability} = answer["payload"]["body"]
+        suggestions = Map.get(answer["payload"]["body"], "suggestions", [])
         {:ok, availability, suggestions}
       _ ->
         :error
@@ -105,8 +105,8 @@ defmodule YayakaPresentation.User do
                             payload, "yayaka", "presentation")
     case YMP.MessageGateway.request(message) do
       {:ok, answer} ->
-        %{"user-name" => user_name,
-          "suggestions" => suggestions} = answer["payload"]["body"]
+        %{"user-name" => user_name} = answer["payload"]["body"]
+        suggestions = Map.get(answer["payload"]["body"], "suggestions", [])
         {:ok, user_name, suggestions}
       _ ->
         :error
