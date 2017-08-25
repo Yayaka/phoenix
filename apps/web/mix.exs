@@ -34,6 +34,9 @@ defmodule Web.Mixfile do
   defp deps do
     [{:db, in_umbrella: true},
      {:ymp, in_umbrella: true},
+     {:yayaka_identity, in_umbrella: true},
+     {:yayaka_repository, in_umbrella: true},
+     {:yayaka_social_graph, in_umbrella: true},
      {:yayaka_presentation, in_umbrella: true},
      {:bypass, "~> 0.7", only: :test},
      {:guardian, "~> 0.14"},

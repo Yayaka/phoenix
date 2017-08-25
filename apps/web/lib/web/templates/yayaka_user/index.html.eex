@@ -1,0 +1,141 @@
+<% opts = [as: :params, method: :post, class: "ui form"] %>
+<%= if :create_user in @actions do %>
+  <div class="ui segment">
+    <h3>Create user</h3>
+    <%= form_for @conn, yayaka_user_path(@conn, :create_user), opts, fn f -> %>
+      <div class="field">
+        <%= label f, :host, "Host" %>
+        <%= text_input f, :host %>
+      </div>
+      <div class="field">
+        <%= label f, :name, "Name" %>
+        <%= text_input f, :name %>
+      </div>
+      <div class="field">
+        <%= label f, :attributes, "Attributes" %>
+        <%= textarea f, :attributes %>
+      </div>
+      <%= submit "Create", class: "ui primary button" %>
+    <% end %>
+  </div>
+<% end %>
+<%= if :check_user_name_availability in @actions do %>
+  <div class="ui segment">
+    <h3>Check user name availability</h3>
+    <%= form_for @conn, yayaka_user_path(@conn, :check_user_name_availability), opts, fn f -> %>
+      <div class="field">
+        <%= label f, :host, "Host" %>
+        <%= text_input f, :host %>
+      </div>
+      <div class="field">
+        <%= label f, :name, "Name" %>
+        <%= text_input f, :name %>
+      </div>
+      <%= submit "Check", class: "ui primary button" %>
+    <% end %>
+  </div>
+<% end %>
+<%= if :update_user_name in @actions do %>
+  <div class="ui segment">
+    <h3>Update user name</h3>
+    <%= form_for @conn, yayaka_user_path(@conn, :update_user_name), opts, fn f -> %>
+      <div class="field">
+        <%= label f, :name, "Name" %>
+        <%= text_input f, :name %>
+      </div>
+      <%= submit "Update", class: "ui primary button" %>
+    <% end %>
+  </div>
+<% end %>
+<%= if :update_user_attributes in @actions do %>
+  <div class="ui segment">
+    <h3>Update user attributes</h3>
+    <%= form_for @conn, yayaka_user_path(@conn, :update_user_attributes), opts, fn f -> %>
+      <div class="field">
+        <%= label f, :attributes, "Attributes" %>
+        <%= textarea f, :attributes %>
+      </div>
+      <%= submit "Update", class: "ui primary button" %>
+    <% end %>
+  </div>
+<% end %>
+<%= if :fetch_user in @actions do %>
+  <div class="ui segment">
+    <h3>Fetch user</h3>
+    <%= form_for @conn, yayaka_user_path(@conn, :fetch_user), opts, fn f -> %>
+      <div class="field">
+        <%= label f, :host, "Host" %>
+        <%= text_input f, :host %>
+      </div>
+      <div class="field">
+        <%= label f, :id, "ID" %>
+        <%= text_input f, :id %>
+      </div>
+      <%= submit "Fetch", class: "ui primary button" %>
+    <% end %>
+  </div>
+<% end %>
+<%= if :get_token in @actions do %>
+  <div class="ui segment">
+    <h3>Get token</h3>
+    <%= form_for @conn, yayaka_user_path(@conn, :get_token), opts, fn f -> %>
+      <div class="field">
+        <%= label f, :host, "Host" %>
+        <%= text_input f, :host %>
+      </div>
+      <%= submit "Get", class: "ui primary button" %>
+    <% end %>
+  </div>
+<% end %>
+<%= if :authenticate_user in @actions do %>
+  <div class="ui segment">
+    <h3>Authenticate user</h3>
+    <%= form_for @conn, yayaka_user_path(@conn, :authenticate_user), opts, fn f -> %>
+      <div class="field">
+        <%= label f, :host, "Host" %>
+        <%= text_input f, :host %>
+      </div>
+      <div class="field">
+        <%= label f, :id, "ID" %>
+        <%= text_input f, :id %>
+      </div>
+      <div class="field">
+        <%= label f, :token, "Token" %>
+        <%= text_input f, :token %>
+      </div>
+      <%= submit "Authenticate", class: "ui primary button" %>
+    <% end %>
+  </div>
+<% end %>
+<%= if :authorize_service in @actions do %>
+  <div class="ui segment">
+    <h3>Authorize service</h3>
+    <%= form_for @conn, yayaka_user_path(@conn, :authorize_service), opts, fn f -> %>
+      <div class="field">
+        <%= label f, :host, "Host" %>
+        <%= text_input f, :host %>
+      </div>
+      <div class="field">
+        <%= label f, :service, "Service" %>
+        <%= text_input f, :service %>
+      </div>
+      <%= submit "Authorize", class: "ui primary button" %>
+    <% end %>
+  </div>
+<% end %>
+<%= if :revoke_service_authorization in @actions do %>
+  <div class="ui segment">
+    <h3>Revoke service authorization</h3>
+    <%= form_for @conn, yayaka_user_path(@conn, :revoke_service_authorization), opts, fn f -> %>
+      <div class="field">
+        <%= label f, :host, "Host" %>
+        <%= text_input f, :host %>
+      </div>
+      <div class="field">
+        <%= label f, :service, "Service" %>
+        <%= text_input f, :service %>
+      </div>
+      <%= submit "Revoke", class: "ui primary button" %>
+    <% end %>
+  </div>
+<% end %>

@@ -29,6 +29,19 @@ defmodule Web.Router do
     get "/login", PageController, :login
     post "/login", SessionController, :create
     get "/logout", SessionController, :delete
+
+    scope "/yayaka" do
+      get "/", YayakaUserController, :index
+      post "/create-user", YayakaUserController, :create_user
+      post "/check-user-name-availability", YayakaUserController, :check_user_name_availability
+      post "/update-user-name", YayakaUserController, :update_user_name
+      post "/update-user-attributes", YayakaUserController, :update_user_attributes
+      post "/fetch-user", YayakaUserController, :fetch_user
+      post "/get-token", YayakaUserController, :get_token
+      post "/authenticate-user", YayakaUserController, :authenticate_user
+      post "/authorize-service", YayakaUserController, :authorize_service
+      post "/revoke-service-authorization", YayakaUserController, :revoke_service_authorization
+    end
   end
 
   scope "/api", Web do

@@ -22,6 +22,23 @@ defmodule Web do
       import Plug.Conn
       import Web.Router.Helpers
       import Web.Gettext
+
+      def get_user(conn) do
+        case Guardian.Plug.current_resource(conn) do
+          nil -> nil
+          user -> DB.Repo.get!(YayakaPresentation.PresentationUser, user["id"])
+        end
+      end
+
+      def get_yayaka_user(conn) do
+        Plug.Conn.get_session(conn, :yayaka_user)
+      end
+
+      def get_yayaka_user!(conn) do
+        case Plug.Conn.get_session(conn, :yayaka_user) do
+          user when not is_nil(user) -> user
+        end
+      end
     end
   end
 
