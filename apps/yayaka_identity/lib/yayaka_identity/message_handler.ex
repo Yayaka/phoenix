@@ -146,6 +146,34 @@ defmodule YayakaIdentity.MessageHandler do
     YMP.MessageGateway.push(answer)
   end
 
+  def handle(%{"action" => "fetch-user-by-name"} = message) do
+    %{"user-name" => user_name} = message["payload"]
+    query = IdentityUser
+            |> where([i], i.name == ^user_name)
+            |> preload([:user_attributes, :authorized_services])
+    user = DB.Repo.one!(query)
+    attributes = Enum.map(user.user_attributes, fn attribute ->
+      %UserAttribute{
+        protocol: protocol, key: key, value: value, sender: sender} = attribute
+      %{"protocol" => protocol,
+        "key" => key,
+        "value" => value,
+        "sender-host" => sender.host}
+    end)
+    authorized_services = Enum.map(user.authorized_services, fn service ->
+      %AuthorizedService{service: service, sender: sender} = service
+      %{"host" => service.host,
+        "service" => to_string(service.service),
+        "sender-host" => sender.host}
+    end)
+    body = %{
+      "user-id" => user.id,
+      "attributes" => attributes,
+      "authorized-services" => authorized_services}
+    answer = Utils.new_answer(message, body)
+    YMP.MessageGateway.push(answer)
+  end
+
   def handle(%{"action" => "get-token"} = message) do
     %{"user-id" => user_id,
       "presentation-host" => host} = message["payload"]

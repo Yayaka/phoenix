@@ -225,6 +225,55 @@ defmodule YayakaIdentity.MessageHandlerTest do
       "sender-host" => "host1"} in authorized_services
   end
 
+  test "fetch-user-by-name" do
+    sender = %{host: "host1", service: :presentation}
+    attribute1 = %{"protocol" => "yayaka", "key" => "name",
+      "value" => %{"text" => "name1"}, "sender" => sender}
+    attribute2 = %{"protocol" => "yayaka", "key" => "biography",
+      "value" => %{"text" => "biography1"}, "sender" => sender}
+    params = %{
+      id: "user1",
+      name: "name1",
+      user_attributes: [attribute1, attribute2],
+      sender: sender
+    }
+    changeset = IdentityUser.changeset(%IdentityUser{}, params)
+    user = DB.Repo.insert!(changeset)
+    service1 = %AuthorizedService{
+      identity_user_id: user.id,
+      service: %{host: "host1", service: :presentation},
+      sender: %{host: "host1", service: :presentation}}
+    service2 = %AuthorizedService{
+      identity_user_id: user.id,
+      service: %{host: "host2", service: :presentation},
+      sender: %{host: "host1", service: :presentation}}
+    service1 == DB.Repo.insert!(service1)
+    service2 == DB.Repo.insert!(service2)
+    payload = %{
+      "user-name" => user.name
+    }
+    message = create_message("fetch-user-by-name", payload)
+    {:ok, answer} = request(@handler, message)
+    body = answer["payload"]["body"]
+    assert body["user-id"] == user.id
+    attributes = body["attributes"]
+    authorized_services = body["authorized-services"]
+    assert length(attributes) == 2
+    attribute1 = Map.delete(attribute1, "sender")
+                 |> Map.put("sender-host", sender.host)
+    attribute2 = Map.delete(attribute2, "sender")
+                 |> Map.put("sender-host", sender.host)
+    assert attribute1 in attributes
+    assert attribute2 in attributes
+    assert length(authorized_services) == 2
+    assert %{"host" => "host1",
+      "service" => "presentation",
+      "sender-host" => "host1"} in authorized_services
+    assert %{"host" => "host2",
+      "service" => "presentation",
+      "sender-host" => "host1"} in authorized_services
+  end
+
   test "get-token" do
     user = %IdentityUser{
       id: "user1",
