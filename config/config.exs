@@ -81,5 +81,12 @@ config :ymp, :connection_protocols, %{
 config :ymp, :service_protocols,
   %{"yayaka" => %{module: Yayaka.MessageHandler, answer_validation: true}}
 
+config :yayaka, :message_handlers, %{
+  "presentation" => %{module: YayakaPresentation.MessageHandler},
+  "identity" => %{module: YayakaIdentity.MessageHandler},
+  "repository" => %{module: YayakaRepository.MessageHandler},
+  "social-graph" => %{module: YayakaSocialGraph.MessageHandler},
+}
+
 
 import_config "../apps/*/config/config.exs"
