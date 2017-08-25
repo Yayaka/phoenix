@@ -41,7 +41,16 @@ defmodule YMP.MessageGateway do
     Registry.register(__MODULE__, message["id"], :ok)
     push(message)
     receive do
-      {:message, message} -> {:ok, message}
+      {:message, message} ->
+        case Map.get(@service_protocols, message["protocol"]) do
+          %{module: module, answer_validation: true} ->
+            IO.inspect(apply(module, :validate_answer, [message]))
+            case apply(module, :validate_answer, [message]) do
+              :ok -> {:ok, message}
+              :error -> {:error, message}
+            end
+          _ -> {:ok, message}
+        end
     after
       @timeout -> :timeout
     end

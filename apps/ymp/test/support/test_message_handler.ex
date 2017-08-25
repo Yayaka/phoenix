@@ -1,5 +1,6 @@
 defmodule YMP.TestMessageHandler do
   @behaviour YMP.MessageHandler
+  @behaviour YMP.AnswerValidator
   @host YMP.get_host()
 
   def start_link() do
@@ -81,20 +82,6 @@ defmodule YMP.TestMessageHandler do
     end
   end
 
-  # Callback
-
-  def handle(message) do
-    host = message["host"]
-    action = message["action"]
-    Registry.dispatch(__MODULE__, {host, action}, fn entries ->
-      Enum.uniq(entries)
-      |> Enum.each(fn {pid, :ok} ->
-        send pid, message
-      end)
-    end)
-    :ok
-  end
-
   def request(module, message, error \\ false) do
     task = Task.async(fn ->
       pid = self()
@@ -118,6 +105,30 @@ defmodule YMP.TestMessageHandler do
       end
     end)
     Task.await(task)
+  end
+
+  # Callback
+
+  @impl YMP.MessageHandler
+  def handle(message) do
+    host = message["host"]
+    action = message["action"]
+    Registry.dispatch(__MODULE__, {host, action}, fn entries ->
+      Enum.uniq(entries)
+      |> Enum.each(fn {pid, :ok} ->
+        send pid, message
+      end)
+    end)
+    :ok
+  end
+
+  @impl YMP.AnswerValidator
+  def validate_answer(message) do
+    if Map.get(message["payload"], "invalid", false) do
+      :error
+    else
+      :ok
+    end
   end
 end
 

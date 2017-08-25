@@ -75,4 +75,11 @@ config :yayaka,
   max_timeline_subscription_length: max_timeline_subscription_length,
   max_notification_subscription_length: max_notification_subscription_length
 
+config :ymp, :connection_protocols, %{
+  "https-token" => %{module: YMP.HTTPSTokenConnection}}
+
+config :ymp, :service_protocols,
+  %{"yayaka" => %{module: Yayaka.MessageHandler, answer_validation: true}}
+
+
 import_config "../apps/*/config/config.exs"

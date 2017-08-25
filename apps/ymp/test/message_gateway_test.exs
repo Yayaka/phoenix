@@ -83,6 +83,37 @@ defmodule YMP.MessageGatewayTest do
       "id" => answer["id"]}
   end
 
+  test "request and answer_validation" do
+    pid = self()
+    Task.start_link(fn ->
+      YMP.TestMessageHandler.register("ymp-message-gateway-test-request")
+      send pid, :ok
+      receive do
+        message ->
+          payload = message["payload"]
+          answer = YMP.Message.new_answer(message, %{"invalid" => true})
+          YMP.MessageGateway.push(answer)
+      end
+    end)
+    receive do
+      :ok -> :ok
+    end
+    message = %{"sender" => %{
+                  "host" => YMP.get_host(),
+                  "protocol" => "test-answer-validation",
+                  "service" => "service1"
+                },
+                "id" => "a",
+                "host" => YMP.get_host(),
+                "protocol" => "test-answer-validation",
+                "service" => "service2",
+                "action" => "ymp-message-gateway-test-request",
+                "payload" => %{}}
+    {:error, answer} = YMP.MessageGateway.request(message)
+    assert answer == %{YMP.Message.new_answer(message, %{"invalid" => true}) |
+      "id" => answer["id"]}
+  end
+
   test "request to remote" do
     host = "host1"
     pid = self()

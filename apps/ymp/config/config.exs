@@ -2,12 +2,6 @@
 # and its dependencies with the aid of the Mix.Config module.
 use Mix.Config
 
-config :ymp, :connection_protocols, %{
-  "https-token" => %{module: YMP.HTTPSTokenConnection}}
-
-config :ymp, :service_protocols,
-  %{"yayaka" => %{module: Yayaka.MessageHandler}}
-
 if Mix.env == :test do
   config :ymp, :connection_protocols, %{
     "test" => %{module: YMP.TestConnection},
@@ -15,6 +9,7 @@ if Mix.env == :test do
     "test-b" => %{module: YMP.ConnectionProviderTest.B}}
   config :ymp, service_protocols: %{
     "test" => %{module: YMP.TestMessageHandler},
+    "test-answer-validation" => %{module: YMP.TestMessageHandler, answer_validation: true},
     "yayaka" => %{module: YMP.TestMessageHandler}}
 end
 

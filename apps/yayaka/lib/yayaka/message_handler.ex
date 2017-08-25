@@ -1,14 +1,20 @@
 defmodule Yayaka.MessageHandler do
   @behaviour YMP.MessageHandler
+  @behaviour YMP.AnswerValidator
 
   @services Application.get_env(:yayaka, :services)
 
+  @impl YMP.MessageHandler
   def handle(%{"service" => service} = message) do
     case Map.get(@services, [service]) do
       %{module: module} ->
         apply(module, :handle, [message])
     end
   end
+
+  @impl YMP.AnswerValidator
+  def validate(%{"payload" => %{"status" => "ok"}}), do: :ok
+  def validate(_), do: :error
 
   defmodule Utils do
     def new_answer(message, body) do
