@@ -10,11 +10,18 @@ defmodule YayakaSocialGraph.MessageHandler do
   alias YayakaSocialGraph.TimelineEvent
   alias YayakaSocialGraph.TimelineSubscriber
   alias Yayaka.MessageHandler.Utils
+  alias Yayaka.YayakaUserCache
+  alias Yayaka.YayakaUser
   import Ecto.Changeset
   import Ecto.Query
   require Logger
 
   @max_timeline_subscription_length Application.get_env(:yayaka, :max_timeline_subscription_length)
+
+  defp assert_authorized(user, service) do
+    {:ok, yayaka_user} = YayakaUserCache.get_or_fetch(user)
+    true = YayakaUser.authorizes?(yayaka_user, service)
+  end
 
   def handle(%{"action" => "subscribe"} = message) do
     %{"subscriber-identity-host" => subscriber_identity_host,
@@ -25,10 +32,8 @@ defmodule YayakaSocialGraph.MessageHandler do
     = message["payload"]
     sender = Utils.get_sender(message)
     "presentation" = sender.service
-    user_info = Utils.fetch_user(subscriber_identity_host,
-                                 subscriber_user_id,
-                                 "social-graph")
-    true = Utils.is_authorized(user_info, sender)
+    user = %{host: subscriber_identity_host, id: subscriber_user_id}
+    assert_authorized(user, sender)
     subscriber = %{
       host: subscriber_identity_host,
       id: subscriber_user_id}
@@ -75,10 +80,8 @@ defmodule YayakaSocialGraph.MessageHandler do
     = message["payload"]
     sender = Utils.get_sender(message)
     "presentation" = sender.service
-    user_info = Utils.fetch_user(subscriber_identity_host,
-                                 subscriber_user_id,
-                                 "social-graph")
-    true = Utils.is_authorized(user_info, sender)
+    user = %{host: subscriber_identity_host, id: subscriber_user_id}
+    assert_authorized(user, sender)
     subscriber = %{
       host: subscriber_identity_host,
       id: subscriber_user_id}
@@ -134,10 +137,8 @@ defmodule YayakaSocialGraph.MessageHandler do
       social_graph: sender,
       sender: sender}
     changeset = Subscriber.changeset(%Subscriber{}, params)
-    user_info = Utils.fetch_user(subscriber_identity_host,
-                                 subscriber_user_id,
-                                 "social-graph")
-    true = Utils.is_authorized(user_info, sender)
+    user = %{host: subscriber_identity_host, id: subscriber_user_id}
+    assert_authorized(user, sender)
     DB.Repo.insert!(changeset)
     body = %{}
     answer = Utils.new_answer(message, body)
@@ -162,10 +163,8 @@ defmodule YayakaSocialGraph.MessageHandler do
       where: s.target_user == ^publisher,
       where: s.social_graph == ^sender
     subscriber = DB.Repo.one!(query)
-    user_info = Utils.fetch_user(subscriber_identity_host,
-                                 subscriber_user_id,
-                                 "social-graph")
-    true = Utils.is_authorized(user_info, sender)
+    user = %{host: subscriber_identity_host, id: subscriber_user_id}
+    assert_authorized(user, sender)
     DB.Repo.delete!(subscriber)
     body = %{}
     answer = Utils.new_answer(message, body)
@@ -299,8 +298,8 @@ defmodule YayakaSocialGraph.MessageHandler do
       "created-at" => created_at} = message["payload"]
     sender = Utils.get_sender(message)
     "repository" = sender.service
-    user_info = Utils.fetch_user(identity_host, user_id, "social-graph")
-    true = Utils.is_authorized(user_info, sender)
+    user = %{host: identity_host, id: user_id}
+    assert_authorized(user, sender)
     query = from s in Subscriber,
       where: s.target_user == ^%{host: identity_host, id: user_id}
     DB.Repo.all(query)

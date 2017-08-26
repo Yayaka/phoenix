@@ -16,6 +16,9 @@ defmodule YayakaSocialGraph.MessageHandlerTest do
   setup do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(DB.Repo)
     Ecto.Adapters.SQL.Sandbox.mode(DB.Repo, {:shared, self()})
+    Cachex.clear(:yayaka_user)
+    Cachex.clear(:yayaka_user_name)
+    :ok
   end
 
   @host YMP.get_host()
