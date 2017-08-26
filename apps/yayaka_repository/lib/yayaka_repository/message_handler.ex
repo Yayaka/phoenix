@@ -8,6 +8,8 @@ defmodule YayakaRepository.MessageHandler do
   alias Yayaka.MessageHandler.Utils
   import Ecto.Changeset
   import Ecto.Query
+  alias Yayaka.YayakaUserCache
+  alias Yayaka.YayakaUser
   require Logger
 
   def handle(%{"action" => "create-event"} = message) do
@@ -18,8 +20,9 @@ defmodule YayakaRepository.MessageHandler do
       "body" => body} = message["payload"]
     sender = Utils.get_sender(message)
     "presentation" = sender.service
-    user_info = Utils.fetch_user(identity_host, user_id, "repository")
-    true = Utils.is_authorized(user_info, sender)
+    {:ok, yayaka_user} =
+      YayakaUserCache.get_or_fetch(%{host: identity_host, id: user_id})
+    true = YayakaUser.authorizes?(yayaka_user, sender)
     params = %{
       id: UUID.uuid4(),
       user: %{host: identity_host, id: user_id},
@@ -30,9 +33,8 @@ defmodule YayakaRepository.MessageHandler do
     }
     changeset = Event.changeset(%Event{}, params)
     event = DB.Repo.insert!(changeset)
-    reposiotry_subscriptions = Utils.get_attribute(user_info,
-                                                   "yayaka",
-                                                   "repository-subscriptions")
+    reposiotry_subscriptions =
+      YayakaUser.get_attribute(yayaka_user, "yayaka", "repository-subscriptions")
     reposiotry_subscriptions["value"]["subscriptions"]
     |> Enum.each(fn subscription ->
       %{"repository-host" => repository_host,
