@@ -29,6 +29,7 @@ defmodule Web.Router do
     get "/login", PageController, :login
     post "/login", SessionController, :create
     get "/logout", SessionController, :delete
+    get "/switch-user", SessionController, :switch
 
     scope "/yayaka" do
       get "/", YayakaUserController, :index

@@ -16,29 +16,33 @@ defmodule Web do
   below.
   """
 
+  def get_yayaka_user(conn) do Plug.Conn.get_session(conn, :yayaka_user)
+  end
+  def get_yayaka_user!(conn) do
+    case Plug.Conn.get_session(conn, :yayaka_user) do
+      user when not is_nil(user) -> user
+    end
+  end
+  def get_user(conn) do
+    case Guardian.Plug.current_resource(conn) do
+      nil -> nil
+      user -> DB.Repo.get!(YayakaPresentation.PresentationUser, user["id"])
+    end
+  end
+  def get_user_links(user) do
+    YayakaPresentation.User.get_user_links(user)
+  end
+
   def controller do
     quote do
       use Phoenix.Controller, namespace: Web
       import Plug.Conn
       import Web.Router.Helpers
       import Web.Gettext
-
-      def get_user(conn) do
-        case Guardian.Plug.current_resource(conn) do
-          nil -> nil
-          user -> DB.Repo.get!(YayakaPresentation.PresentationUser, user["id"])
-        end
-      end
-
-      def get_yayaka_user(conn) do
-        Plug.Conn.get_session(conn, :yayaka_user)
-      end
-
-      def get_yayaka_user!(conn) do
-        case Plug.Conn.get_session(conn, :yayaka_user) do
-          user when not is_nil(user) -> user
-        end
-      end
+      import Web, only: [
+        get_yayaka_user: 1,
+        get_yayaka_user!: 1,
+        get_user: 1]
     end
   end
 
@@ -56,10 +60,11 @@ defmodule Web do
       import Web.Router.Helpers
       import Web.ErrorHelpers
       import Web.Gettext
-
-      def get_user(conn) do
-        Guardian.Plug.current_resource(conn)
-      end
+      import Web, only: [
+        get_yayaka_user: 1,
+        get_yayaka_user!: 1,
+        get_user: 1,
+        get_user_links: 1]
     end
   end
 

@@ -20,11 +20,24 @@
         </a>
         <div class="right menu">
           <% user = get_user(@conn) %>
+          <% yayaka_user = get_yayaka_user(@conn) %>
           <%= if user do %>
             <div class="ui dropdown item">
-              <div class="text"><%= user["name"] %></div>
+              <%= if yayaka_user do %>
+                <div class="text"><%= yayaka_user.id %>@<%= yayaka_user.host %></div>
+              <% else %>
+                <div class="text"><%= user.name %></div>
+              <% end %>
               <i class="dropdown icon"></i>
               <div class="menu">
+                <a class="item" href="<%= yayaka_user_path(@conn, :index) %>">Yayaka API</a>
+                <%= for link <- get_user_links(user) do %>
+                  <% host = link.user.host %>
+                  <% id = link.user.id %>
+                  <a class="item" href="<%= session_path(@conn, :switch, host: host, id: id) %>">
+                    <%= "#{id} @ #{host}" %>
+                  </a>
+                <% end %>
                 <a class="item" href="<%= session_path(@conn, :delete) %>">Sign out</a>
               </div>
             </div>
