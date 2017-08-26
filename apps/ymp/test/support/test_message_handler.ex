@@ -29,7 +29,7 @@ defmodule YMP.TestMessageHandler do
   @host YMP.get_host()
   defmacro mock(host \\ @host, action_name, func) do
     quote bind_quoted: [host: host, action_name: action_name, func: func] do
-      if host != @host do
+      if host != YMP.get_host() do
         YMP.TestMessageHandler.represent_remote_host(host)
       end
       task = Task.async(fn ->
