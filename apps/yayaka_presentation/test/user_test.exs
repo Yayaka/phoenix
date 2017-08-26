@@ -43,6 +43,53 @@ defmodule YayakaPresentation.UserTest do
     assert :error = User.sign_in(user_name, "wrong_password")
   end
 
+  test "get_user_links" do
+    user_name = "name1"
+    user_password = "password1"
+    presentation_user = %PresentationUser{
+      name: user_name,
+      password_hash: hashpwsalt(user_password)
+    } |> DB.Repo.insert!()
+    user1 = %{host: "host1", id: "id1"}
+    user2 = %{host: "host2", id: "id2"}
+    user_link1 = %UserLink{
+      presentation_user_id: presentation_user.id,
+      user: user1} |> DB.Repo.insert!()
+    user_link2 = %UserLink{
+      presentation_user_id: presentation_user.id,
+      user: user2} |> DB.Repo.insert!()
+    list = User.get_user_links(presentation_user)
+    assert user_link1 in list
+    assert user_link2 in list
+  end
+
+  test "linked?" do
+    user_name1 = "name1"
+    user_password1 = "password1"
+    user_name2 = "name2"
+    user_password2 = "password2"
+    presentation_user1 = %PresentationUser{
+      name: user_name1,
+      password_hash: hashpwsalt(user_password2)
+    } |> DB.Repo.insert!()
+    presentation_user2 = %PresentationUser{
+      name: user_name2,
+      password_hash: hashpwsalt(user_password2)
+    } |> DB.Repo.insert!()
+    user1 = %{host: "host1", id: "id1"}
+    user2 = %{host: "host2", id: "id2"}
+    user_link1 = %UserLink{
+      presentation_user_id: presentation_user1.id,
+      user: user1} |> DB.Repo.insert!()
+    user_link2 = %UserLink{
+      presentation_user_id: presentation_user2.id,
+      user: user2} |> DB.Repo.insert!()
+    assert User.linked?(presentation_user1, user1)
+    assert User.linked?(presentation_user2, user2)
+    refute User.linked?(presentation_user1, user2)
+    refute User.linked?(presentation_user2, user1)
+  end
+
   test "create" do
     presentation_user = %PresentationUser{
       name: "name1",

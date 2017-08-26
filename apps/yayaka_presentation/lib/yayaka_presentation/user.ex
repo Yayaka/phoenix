@@ -15,6 +15,8 @@ defmodule YayakaPresentation.User do
   @typep attributes :: [attribute]
   @typep token :: String.t
   @typep expires :: integer
+  @typep link_id :: integer
+  @typep user_link :: %UserLink{}
 
   defp insert_user_link(presentation_user, user) do
     params = %{
@@ -57,6 +59,21 @@ defmodule YayakaPresentation.User do
         dummy_checkpw()
         :error
     end
+  end
+
+  @spec get_user_links(presentation_user) :: [user_link]
+  def get_user_links(presentation_user) do
+    query = from l in UserLink,
+      where: l.presentation_user_id == ^presentation_user.id
+    DB.Repo.all(query)
+  end
+
+  @spec linked?(presentation_user, user) :: boolean
+  def linked?(presentation_user, user) do
+    query = from l in UserLink,
+      where: l.presentation_user_id == ^presentation_user.id,
+      where: l.user == ^user
+    1 == DB.Repo.aggregate(query, :count, :id)
   end
 
   @spec create(presentation_user, host, name, attributes) :: {:ok, user, name} | :error
