@@ -38,6 +38,12 @@ defmodule YayakaIdentity.MessageHandler do
       changeset
     end
     identity_user = DB.Repo.insert!(changeset)
+    params = %{
+      identity_user_id: identity_user.id,
+      service: sender,
+      sender: sender}
+    changeset = AuthorizedService.changeset(%AuthorizedService{}, params)
+    DB.Repo.insert!(changeset)
     body = %{
       "user-id" => identity_user.id,
       "user-name" => identity_user.name

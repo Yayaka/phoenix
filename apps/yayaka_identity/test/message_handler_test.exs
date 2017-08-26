@@ -53,6 +53,12 @@ defmodule YayakaIdentity.MessageHandlerTest do
     attributes = DB.Repo.all(Ecto.assoc(user, :user_attributes))
     assert attributes |> length == 1
     assert hd(attributes).value == %{"text" => "user1name"}
+    query = from a in AuthorizedService,
+      where: a.identity_user_id == ^user.id
+    authorized_services = DB.Repo.all(query)
+    assert length(authorized_services) == 1
+    assert hd(authorized_services).service ==
+      %{host: @host, service: "presentation"}
     # Same name
     payload = %{
       "user-name" => "user1",
