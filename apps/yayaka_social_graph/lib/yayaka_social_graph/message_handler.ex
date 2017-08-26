@@ -337,8 +337,8 @@ defmodule YayakaSocialGraph.MessageHandler do
       "created-at" => created_at} = message["payload"]
     sender = Utils.get_sender(message)
     "social-graph" = sender.service
-    user_info = Utils.fetch_user(identity_host, user_id, "social-graph")
-    true = Utils.is_authorized(user_info, sender)
+    user = %{host: identity_host, id: user_id}
+    assert_authorized(user, sender)
     query = from s in Subscription,
       where: s.target_user == ^%{host: identity_host, id: user_id},
       where: s.social_graph == ^sender
