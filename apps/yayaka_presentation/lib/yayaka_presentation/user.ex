@@ -250,4 +250,66 @@ defmodule YayakaPresentation.User do
       _ -> :error
     end
   end
+
+  @spec fetch_relations(host, user) :: {:ok, [{host, user}], [{host, user}]} | :error
+  def fetch_relations(host, user) do
+    payload = %{
+      "identity-host" => user.host,
+      "user-id" => user.id}
+    message = YMP.Message.new(host,
+                              "yayaka", "social-graph", "fetch-user-relations",
+                              payload, "yayaka", "presentation")
+    case YMP.MessageGateway.request(message) do
+      {:ok, answer} ->
+        %{"subscriptions" => subscriptions,
+          "subscribers" => subscribers} = answer["payload"]["body"]
+        subscriptions = map_relations(subscriptions)
+        subscribers = map_relations(subscribers)
+        {:ok, subscriptions, subscribers}
+      _ -> :error
+    end
+  end
+
+  defp map_relations(relations) do
+    Enum.map(relations, fn relation ->
+      %{"identity-host" => identity_host,
+        "user-id" => user_id,
+        "social-graph-host" => social_graph_host} = relation
+      {%{host: identity_host, id: user_id}, social_graph_host}
+    end)
+  end
+
+  @spec subscribe(host, user, host, user) :: :ok | :error
+  def subscribe(host, user, target_host, target_user) do
+    payload = %{
+      "subscriber-identity-host" => user.host,
+      "subscriber-user-id" => user.id,
+      "publisher-identity-host" => target_user.host,
+      "publisher-user-id" => target_user.id,
+      "publisher-social-graph-host" => target_host}
+    message = YMP.Message.new(host,
+                              "yayaka", "social-graph", "subscribe",
+                              payload, "yayaka", "presentation")
+    case YMP.MessageGateway.request(message) do
+      {:ok, _answer} -> :ok
+      _ -> :error
+    end
+  end
+
+  @spec unsubscribe(host, user, host, user) :: :ok | :error
+  def unsubscribe(host, user, target_host, target_user) do
+    payload = %{
+      "subscriber-identity-host" => user.host,
+      "subscriber-user-id" => user.id,
+      "publisher-identity-host" => target_user.host,
+      "publisher-user-id" => target_user.id,
+      "publisher-social-graph-host" => target_host}
+    message = YMP.Message.new(host,
+                              "yayaka", "social-graph", "unsubscribe",
+                              payload, "yayaka", "presentation")
+    case YMP.MessageGateway.request(message) do
+      {:ok, _answer} -> :ok
+      _ -> :error
+    end
+  end
 end

@@ -369,4 +369,73 @@ defmodule YayakaPresentation.UserTest do
       assert :ok == User.revoke_service_authorization(user, service)
     end
   end
+
+  test "fetch_relations" do
+    host = "social_graph_host1"
+    user = %{host: "host1", id: "id1"}
+    user1 = %{host: "host1", id: "id1"}
+    host1 = "host3"
+    user2 = %{host: "host2", id: "id2"}
+    host2 = "host4"
+    with_mocks do
+      mock host, "fetch-user-relations", fn message ->
+        assert message["payload"]["identity-host"] == user.host
+        assert message["payload"]["user-id"] == user.id
+        body = %{
+          "subscriptions" => [
+            %{"identity-host" => user1.host,
+              "user-id" => user1.id,
+              "social-graph-host" => host1}],
+          "subscribers" => [
+            %{"identity-host" => user2.host,
+              "user-id" => user2.id,
+              "social-graph-host" => host2}]
+        }
+        answer = Utils.new_answer(message, body)
+        YMP.MessageGateway.push(answer)
+      end
+      assert {:ok, [{user1, host1}], [{user2, host2}]} ==
+        User.fetch_relations(host, user)
+    end
+  end
+
+  test "subscribe" do
+    host1 = "host3"
+    user1 = %{host: "host1", id: "id1"}
+    host2 = "host4"
+    user2 = %{host: "host2", id: "id2"}
+    with_mocks do
+      mock host1, "subscribe", fn message ->
+        assert message["payload"]["subscriber-identity-host"] == user1.host
+        assert message["payload"]["subscriber-user-id"] == user1.id
+        assert message["payload"]["publisher-identity-host"] == user2.host
+        assert message["payload"]["publisher-user-id"] == user2.id
+        assert message["payload"]["publisher-social-graph-host"] == host2
+        body = %{}
+        answer = Utils.new_answer(message, body)
+        YMP.MessageGateway.push(answer)
+      end
+      assert :ok == User.subscribe(host1, user1, host2, user2)
+    end
+  end
+
+  test "unsubscribe" do
+    host1 = "host3"
+    user1 = %{host: "host1", id: "id1"}
+    host2 = "host4"
+    user2 = %{host: "host2", id: "id2"}
+    with_mocks do
+      mock host1, "unsubscribe", fn message ->
+        assert message["payload"]["subscriber-identity-host"] == user1.host
+        assert message["payload"]["subscriber-user-id"] == user1.id
+        assert message["payload"]["publisher-identity-host"] == user2.host
+        assert message["payload"]["publisher-user-id"] == user2.id
+        assert message["payload"]["publisher-social-graph-host"] == host2
+        body = %{}
+        answer = Utils.new_answer(message, body)
+        YMP.MessageGateway.push(answer)
+      end
+      assert :ok == User.unsubscribe(host1, user1, host2, user2)
+    end
+  end
 end
