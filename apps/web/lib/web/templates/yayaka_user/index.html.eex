@@ -1,11 +1,53 @@
 <% opts = [as: :params, method: :post, class: "ui form"] %>
+<%= if not is_nil(@user) do %>
+  <div class="ui segment">
+    <p>Host: <%= @user.host %></p>
+    <p>ID: <%= @user.id %></p>
+    <p>Name: <%= @user.name %></p>
+    <p>Attributes:</p>
+    <%= if length(@user.attributes) != 0 do %>
+      <table class="ui celled unstackable table">
+        <thead>
+          <tr><th>Protocol</th><th>Key</th><th>Value</th><th>Sender</th></tr>
+        </thead>
+        <tbody>
+          <%= for attribute <- @user.attributes do %>
+            <tr>
+              <td><%= attribute["protocol"] %></td>
+              <td><%= attribute["key"] %></td>
+              <td><%= Poison.encode!(attribute["value"]) %></td>
+              <td><%= attribute["sender-host"] %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% end %>
+    <p>Authorized services:</p>
+    <%= if length(@user.authorized_services) != 0 do %>
+      <table class="ui celled unstackable table">
+        <thead>
+          <tr><th>Host</th><th>Service</th><th>Sender</th></tr>
+        </thead>
+        <tbody>
+          <%= for service <- @user.authorized_services do %>
+            <tr>
+              <td><%= service["host"] %></td>
+              <td><%= service["service"] %></td>
+              <td><%= service["sender-host"] %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% end %>
+  </div>
+<% end %>
 <%= if :create_user in @actions do %>
   <div class="ui segment">
     <h3>Create user</h3>
     <%= form_for @conn, yayaka_user_path(@conn, :create_user), opts, fn f -> %>
       <div class="field">
         <%= label f, :host, "Host" %>
-        <%= text_input f, :host %>
+        <%= text_input f, :host, value: YMP.get_host() %>
       </div>
       <div class="field">
         <%= label f, :name, "Name" %>
@@ -13,7 +55,7 @@
       </div>
       <div class="field">
         <%= label f, :attributes, "Attributes" %>
-        <%= textarea f, :attributes %>
+        <%= textarea f, :attributes, value: "[]" %>
       </div>
       <%= submit "Create", class: "ui primary button" %>
     <% end %>
@@ -25,7 +67,7 @@
     <%= form_for @conn, yayaka_user_path(@conn, :check_user_name_availability), opts, fn f -> %>
       <div class="field">
         <%= label f, :host, "Host" %>
-        <%= text_input f, :host %>
+        <%= text_input f, :host, value: YMP.get_host() %>
       </div>
       <div class="field">
         <%= label f, :name, "Name" %>
@@ -52,8 +94,16 @@
     <h3>Update user attributes</h3>
     <%= form_for @conn, yayaka_user_path(@conn, :update_user_attributes), opts, fn f -> %>
       <div class="field">
-        <%= label f, :attributes, "Attributes" %>
-        <%= textarea f, :attributes %>
+        <%= label f, :protocol, "Protocol" %>
+        <%= text_input f, :protocol %>
+      </div>
+      <div class="field">
+        <%= label f, :key, "Key" %>
+        <%= text_input f, :key %>
+      </div>
+      <div class="field">
+        <%= label f, :value, "Value" %>
+        <%= text_input f, :value, value: "{}" %>
       </div>
       <%= submit "Update", class: "ui primary button" %>
     <% end %>
@@ -65,7 +115,7 @@
     <%= form_for @conn, yayaka_user_path(@conn, :fetch_user), opts, fn f -> %>
       <div class="field">
         <%= label f, :host, "Host" %>
-        <%= text_input f, :host %>
+        <%= text_input f, :host, value: YMP.get_host() %>
       </div>
       <div class="field">
         <%= label f, :id, "ID" %>
@@ -81,7 +131,7 @@
     <%= form_for @conn, yayaka_user_path(@conn, :fetch_user_by_name), opts, fn f -> %>
       <div class="field">
         <%= label f, :host, "Host" %>
-        <%= text_input f, :host %>
+        <%= text_input f, :host, value: YMP.get_host() %>
       </div>
       <div class="field">
         <%= label f, :name, "Name" %>
@@ -97,7 +147,7 @@
     <%= form_for @conn, yayaka_user_path(@conn, :get_token), opts, fn f -> %>
       <div class="field">
         <%= label f, :host, "Host" %>
-        <%= text_input f, :host %>
+        <%= text_input f, :host, value: YMP.get_host() %>
       </div>
       <%= submit "Get", class: "ui primary button" %>
     <% end %>
@@ -109,7 +159,7 @@
     <%= form_for @conn, yayaka_user_path(@conn, :authenticate_user), opts, fn f -> %>
       <div class="field">
         <%= label f, :host, "Host" %>
-        <%= text_input f, :host %>
+        <%= text_input f, :host, value: YMP.get_host() %>
       </div>
       <div class="field">
         <%= label f, :id, "ID" %>
@@ -129,7 +179,7 @@
     <%= form_for @conn, yayaka_user_path(@conn, :authorize_service), opts, fn f -> %>
       <div class="field">
         <%= label f, :host, "Host" %>
-        <%= text_input f, :host %>
+        <%= text_input f, :host, value: YMP.get_host() %>
       </div>
       <div class="field">
         <%= label f, :service, "Service" %>
@@ -145,7 +195,7 @@
     <%= form_for @conn, yayaka_user_path(@conn, :revoke_service_authorization), opts, fn f -> %>
       <div class="field">
         <%= label f, :host, "Host" %>
-        <%= text_input f, :host %>
+        <%= text_input f, :host, value: YMP.get_host() %>
       </div>
       <div class="field">
         <%= label f, :service, "Service" %>

@@ -1,6 +1,7 @@
 defmodule Web.YayakaUserController do
   use Web, :controller
   alias YayakaPresentation.User
+  alias Yayaka.YayakaUserCache
 
   plug Guardian.Plug.EnsureAuthenticated, %{handler: __MODULE__} when action in [
     :create_user, :update_user_name, :update_user_attributes,
@@ -29,6 +30,12 @@ defmodule Web.YayakaUserController do
   def index(conn, _params) do
     presentation_user = get_user(conn)
     user = get_yayaka_user(conn)
+    cache = if not is_nil(user) do
+      {:ok, cache} = YayakaUserCache.get_or_fetch(user)
+      cache
+    else
+      nil
+    end
     actions = case {presentation_user, user} do
       {nil, _} ->
         [:check_user_name_availability, :fetch_user, :fetch_user_by_name]
@@ -41,7 +48,7 @@ defmodule Web.YayakaUserController do
          :get_token, :authenticate_user,
          :authorize_service, :revoke_service_authorization]
     end
-    render conn, "index.html", actions: actions
+    render conn, "index.html", actions: actions, user: cache
   end
 
   def create_user(conn, %{"params" => params}) do
@@ -96,8 +103,14 @@ defmodule Web.YayakaUserController do
 
   def update_user_attributes(conn, %{"params" => params}) do
     user = get_yayaka_user!(conn)
-    %{"attributes" => attributes} = params
-    attributes = Poison.decode!(attributes)
+    %{"protocol" => protocol,
+      "key" => key,
+      "value" => value} = params
+    value = Poison.decode!(value)
+    attributes = [
+      %{"protocol" => protocol,
+        "key" => key,
+        "value" => value}]
     case User.update_user_attributes(user, attributes) do
       :ok ->
         ok(conn, """

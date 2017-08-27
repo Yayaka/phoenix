@@ -4,6 +4,13 @@ defmodule Web.YayakaUserControllerTest do
   alias Yayaka.MessageHandler.Utils
 
   @user %{host: "hostx", id: "idx"}
+  @yayaka_user %Yayaka.YayakaUser{
+    host: @user.host,
+    id: @user.id,
+    name: "name1",
+    attributes: [],
+    authorized_services: []
+  }
 
   defmodule Macros do
     defmacro with_error(host \\ nil, action, do: block) do
@@ -23,6 +30,7 @@ defmodule Web.YayakaUserControllerTest do
 
   def sign_up(conn, with_yayaka_user \\ true) do
     {:ok, user} = YayakaPresentation.User.sign_up("name1", "password1")
+    Cachex.set(:yayaka_user, @user, @yayaka_user)
     conn
     |> bypass_through(Web.Router, :browser)
     |> get("/")
@@ -83,6 +91,7 @@ defmodule Web.YayakaUserControllerTest do
     assert response =~ "Authenticate user"
     assert response =~ "Authorize service"
     assert response =~ "Revoke service authorization"
+    assert response =~ @yayaka_user.name
   end
 
   # create-user
@@ -214,22 +223,22 @@ defmodule Web.YayakaUserControllerTest do
   # update-user-attributes
 
   test "POST /yayaka/update-user-attributes", %{conn: conn} do
-    attributes = [
-      %{"protocol" => "yayaka",
-        "type" => "name",
-        "value" => %{"text" => "Name 2"}}]
+    attribute = %{
+      "protocol" => "yayaka",
+      "key" => "name",
+      "value" => %{"text" => "Name 2"}}
     with_mocks do
       mock @user.host, "update-user-attributes", fn message ->
         assert message["payload"]["user-id"] == @user.id
-        assert message["payload"]["attributes"] == attributes
+        assert message["payload"]["attributes"] == [attribute]
         body = %{}
         answer = Utils.new_answer(message, body)
         YMP.MessageGateway.push(answer)
       end
       params = %{
-        "host" => @user.host,
-        "id" => @user.id,
-        "attributes" => Poison.encode!(attributes)
+        "protocol" => attribute["protocol"],
+        "key" => attribute["key"],
+        "value" => Poison.encode!(attribute["value"]),
       }
       conn = sign_up(conn)
              |> post yayaka_user_path(conn, :update_user_attributes), params: params
@@ -242,9 +251,9 @@ defmodule Web.YayakaUserControllerTest do
     import __MODULE__.Macros
     with_error "update-user-attributes" do
       params = %{
-        "host" => @user.host,
-        "id" => @user.id,
-        "attributes" => Poison.encode!([])
+        "protocol" => "protocol1",
+        "key" => "key1",
+        "value" => "{}",
       }
       conn = sign_up(conn)
              |> post yayaka_user_path(conn, :update_user_attributes), params: params
