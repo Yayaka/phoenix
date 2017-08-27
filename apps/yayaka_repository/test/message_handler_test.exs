@@ -94,6 +94,7 @@ defmodule YayakaRepository.MessageHandlerTest do
         payload = pushed["payload"]
         assert pushed["host"] == social_graph_host
         assert pushed["service"] == "social-graph"
+        assert pushed["sender"]["service"] == "repository"
         assert payload["repository-host"] == body["repository-host"]
         assert payload["event-id"] == body["event-id"]
         assert payload["identity-host"] == identity_host

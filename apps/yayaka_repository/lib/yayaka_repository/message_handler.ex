@@ -52,7 +52,7 @@ defmodule YayakaRepository.MessageHandler do
           "created-at" => Utils.to_datetime(event.inserted_at)}
         message = YMP.Message.new(social_graph_host,
                                   "yayaka", "social-graph", "broadcast-event",
-                                  payload, "yayaka", "repiository")
+                                  payload, "yayaka", "repository")
         YMP.MessageGateway.request(message)
       end
     end)
