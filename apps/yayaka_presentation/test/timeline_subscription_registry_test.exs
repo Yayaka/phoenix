@@ -6,6 +6,19 @@ defmodule YayakaPresentation.TimelineSubscriptionRegistryTest do
   alias Yayaka.MessageHandler.Utils
   import Ecto.Query
 
+  @event %{
+    "identity-host" => "host1",
+    "user-id" => "id1",
+    "protocol" => "text",
+    "type" => "post",
+    "body" => %{
+      "contents" => [
+        %{"protocol" => "yayaka",
+          "type" => "plaintext",
+          "body" => %{"text" => "aaa"}}
+      ]
+    }}
+
   setup do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(DB.Repo)
     Ecto.Adapters.SQL.Sandbox.mode(DB.Repo, {:shared, self()})
@@ -25,16 +38,16 @@ defmodule YayakaPresentation.TimelineSubscriptionRegistryTest do
         assert message["payload"]["expires"] > now
         assert message["payload"]["identity-host"] == user.host
         assert message["payload"]["user-id"] == user.id
-        assert message["payload"]["limit"] == 0
+        assert message["payload"]["limit"] == 10
         body = %{
           "subscription-id" => subscription_id,
           "expires" => now + 1000,
-          "events" => []}
+          "events" => [@event]}
         answer = Utils.new_answer(message, body)
         YMP.MessageGateway.push(answer)
       end
-      assert {:ok, subscription, []} =
-        TimelineSubscriptionRegistry.subscribe(social_graph.host, user)
+      assert {:ok, subscription, [@event]} =
+        TimelineSubscriptionRegistry.subscribe(social_graph.host, user, 10)
       query = from s in TimelineSubscription,
         where: s.user == ^user,
         where: s.social_graph == ^social_graph,
@@ -59,6 +72,30 @@ defmodule YayakaPresentation.TimelineSubscriptionRegistryTest do
       TimelineSubscriptionRegistry.subscribe(social_graph.host, user)
     assert [{self(), :ok}] ==
       Registry.lookup(TimelineSubscriptionRegistry, subscription.id)
+  end
+
+  test "subscribe with an available subscription and fetch" do
+    expires = (DateTime.utc_now() |> DateTime.to_unix()) + 1000 # not expired
+    user = %{host: "host1", id: "id1"}
+    social_graph = %{host: "host2", service: :social_graph}
+    %TimelineSubscription{
+      id: "id1", user: user, social_graph: social_graph, expires: expires
+    } |> DB.Repo.insert!()
+    subscription = DB.Repo.get(TimelineSubscription, "id1")
+    with_mocks do
+      mock social_graph.host, "fetch-timeline", fn message ->
+        assert message["payload"]["identity-host"] == user.host
+        assert message["payload"]["user-id"] == user.id
+        assert message["payload"]["limit"] == 10
+        body = %{"events" => [@event]}
+        answer = Utils.new_answer(message, body)
+        YMP.MessageGateway.push(answer)
+      end
+      assert {:ok, subscription, [@event]} ==
+        TimelineSubscriptionRegistry.subscribe(social_graph.host, user, 10)
+      assert [{self(), :ok}] ==
+        Registry.lookup(TimelineSubscriptionRegistry, subscription.id)
+    end
   end
 
   test "unsubscribe" do
@@ -130,32 +167,20 @@ defmodule YayakaPresentation.TimelineSubscriptionRegistryTest do
       social_graph: social_graph,
       expires: now + 1000
     } |> DB.Repo.insert!()
-    event = %{
-      "identity-host" => "host1",
-      "user-id" => "id1",
-      "protocol" => "text",
-      "type" => "post",
-      "body" => %{
-        "contents" => [
-          %{"protocol" => "yayaka",
-            "type" => "plaintext",
-            "body" => %{"text" => "aaa"}}
-        ]
-      }}
     task1 = Task.async(fn ->
       Registry.register(TimelineSubscriptionRegistry, expired.id, :ok)
-      refute_receive {:event, event}
+      refute_receive {:event, @event}
       :ok
     end)
     task2 = Task.async(fn ->
       Registry.register(TimelineSubscriptionRegistry, available.id, :ok)
-      assert_receive {:event, event}
+      assert_receive {:event, @event}
       :ok
     end)
     assert :error ==
-      TimelineSubscriptionRegistry.push_event(expired.id, event)
+      TimelineSubscriptionRegistry.push_event(expired.id, @event)
     assert :ok ==
-      TimelineSubscriptionRegistry.push_event(available.id, event)
+      TimelineSubscriptionRegistry.push_event(available.id, @event)
     assert :ok == Task.await(task1)
     assert :ok == Task.await(task2)
   end

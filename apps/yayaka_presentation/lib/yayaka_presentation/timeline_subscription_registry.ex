@@ -41,8 +41,23 @@ defmodule YayakaPresentation.TimelineSubscriptionRegistry do
         Registry.register(__MODULE__, subscription.id, :ok)
         {:ok, subscription, events}
       subscription ->
+        events = if limit >= 1 do
+          payload = %{
+            "identity-host" => user.host,
+            "user-id" => user.id,
+            "limit" => limit}
+          subscribe_timeline =
+            YMP.Message.new(social_graph_host,
+                            "yayaka", "social-graph", "fetch-timeline",
+                            payload, "yayaka", "presentation")
+          {:ok, answer} = YMP.MessageGateway.request(subscribe_timeline)
+          %{"events" => events} = answer["payload"]["body"]
+          events
+        else
+          []
+        end
         Registry.register(__MODULE__, subscription.id, :ok)
-        {:ok, subscription, []}
+        {:ok, subscription, events}
     end
   after
     :error
