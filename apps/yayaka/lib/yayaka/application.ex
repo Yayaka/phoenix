@@ -3,7 +3,7 @@ defmodule Yayaka.Application do
 
   use Application
 
-  @user_information_ttl :timer.minutes(30)
+  @user_information_ttl :timer.minutes(1)
   @user_name_ttl :timer.hours(24)
 
   def start(_type, _args) do

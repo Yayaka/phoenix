@@ -105,4 +105,28 @@ defmodule Yayaka.YayakaUserCacheTest do
       assert {:ok, user.id} == Cachex.get(:yayaka_user_name, %{host: user.host, name: cache.name})
     end
   end
+
+  test "delete" do
+    user1 = %{host: "host1", id: "id1"}
+    cache1 = %YayakaUser{
+      id: user1.id,
+      host: user1.host,
+      name: "name1",
+      attributes: [],
+      authorized_services: []
+    }
+    user2 = %{host: "host2", id: "id2"}
+    cache2 = %YayakaUser{
+      id: user2.id,
+      host: user2.host,
+      name: "name2",
+      attributes: [],
+      authorized_services: []
+    }
+    Cachex.set(:yayaka_user, user1, cache1)
+    Cachex.set(:yayaka_user, user2, cache2)
+    YayakaUserCache.delete(user2)
+    assert {:ok, cache1} == Cachex.get(:yayaka_user, user1)
+    assert {:missing, nil} == Cachex.get(:yayaka_user, user2)
+  end
 end

@@ -84,4 +84,10 @@ defmodule Yayaka.YayakaUserCache do
         :error
     end
   end
+
+  @spec delete(map) :: :ok
+  def delete(user) do
+    Cachex.del(:yayaka_user, user)
+    :ok
+  end
 end
