@@ -43,6 +43,9 @@ defmodule Web.Router do
       post "/authenticate-user", YayakaUserController, :authenticate_user
       post "/authorize-service", YayakaUserController, :authorize_service
       post "/revoke-service-authorization", YayakaUserController, :revoke_service_authorization
+      post "/fetch-user-relations", YayakaUserController, :fetch_user_relations
+      post "/subscribe", YayakaUserController, :subscribe
+      post "/unsubscribe", YayakaUserController, :unsubscribe
     end
   end
 

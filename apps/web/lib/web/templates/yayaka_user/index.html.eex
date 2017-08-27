@@ -103,7 +103,7 @@
       </div>
       <div class="field">
         <%= label f, :value, "Value" %>
-        <%= text_input f, :value, value: "{}" %>
+        <%= textarea f, :value, value: "{}" %>
       </div>
       <%= submit "Update", class: "ui primary button" %>
     <% end %>
@@ -202,6 +202,66 @@
         <%= text_input f, :service %>
       </div>
       <%= submit "Revoke", class: "ui primary button" %>
+    <% end %>
+  </div>
+<% end %>
+<%= if :fetch_user_relations in @actions do %>
+  <div class="ui segment">
+    <h3>Fetch user relations</h3>
+    <%= form_for @conn, yayaka_user_path(@conn, :fetch_user_relations), opts, fn f -> %>
+      <div class="field">
+        <%= label f, :host, "Host" %>
+        <%= text_input f, :host, value: YMP.get_host() %>
+      </div>
+      <%= submit "Fetch", class: "ui primary button" %>
+    <% end %>
+  </div>
+<% end %>
+<%= if :subscribe in @actions do %>
+  <div class="ui segment">
+    <h3>Subscribe</h3>
+    <%= form_for @conn, yayaka_user_path(@conn, :subscribe), opts, fn f -> %>
+      <div class="field">
+        <%= label f, :subscriber_host, "Subscriber host" %>
+        <%= text_input f, :subscriber_host, value: YMP.get_host() %>
+      </div>
+      <div class="field">
+        <%= label f, :identity_host, "Identity host" %>
+        <%= text_input f, :identity_host, value: YMP.get_host() %>
+      </div>
+      <div class="field">
+        <%= label f, :user_id, "User ID" %>
+        <%= text_input f, :user_id %>
+      </div>
+      <div class="field">
+        <%= label f, :publisher_host, "Publisher host" %>
+        <%= text_input f, :publisher_host, value: YMP.get_host() %>
+      </div>
+      <%= submit "Subscribe", class: "ui primary button" %>
+    <% end %>
+  </div>
+<% end %>
+<%= if :unsubscribe in @actions do %>
+  <div class="ui segment">
+    <h3>Unsubscribe</h3>
+    <%= form_for @conn, yayaka_user_path(@conn, :unsubscribe), opts, fn f -> %>
+      <div class="field">
+        <%= label f, :subscriber_host, "Subscriber host" %>
+        <%= text_input f, :subscriber_host, value: YMP.get_host() %>
+      </div>
+      <div class="field">
+        <%= label f, :identity_host, "Identity host" %>
+        <%= text_input f, :identity_host, value: YMP.get_host() %>
+      </div>
+      <div class="field">
+        <%= label f, :user_id, "User ID" %>
+        <%= text_input f, :user_id %>
+      </div>
+      <div class="field">
+        <%= label f, :publisher_host, "Publisher host" %>
+        <%= text_input f, :publisher_host, value: YMP.get_host() %>
+      </div>
+      <%= submit "Unsubscribe", class: "ui primary button" %>
     <% end %>
   </div>
 <% end %>

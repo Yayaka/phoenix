@@ -59,6 +59,9 @@ defmodule Web.YayakaUserControllerTest do
     refute response =~ "Authenticate user"
     refute response =~ "Authorize service"
     refute response =~ "Revoke service authorization"
+    refute response =~ "Fetch user relations"
+    refute response =~ "Subscribe"
+    refute response =~ "Unsubscribe"
   end
 
   test "GET /yayaka with signing in", %{conn: conn} do
@@ -75,6 +78,9 @@ defmodule Web.YayakaUserControllerTest do
     refute response =~ "Authenticate user"
     refute response =~ "Authorize service"
     refute response =~ "Revoke service authorization"
+    refute response =~ "Fetch user relations"
+    refute response =~ "Subscribe"
+    refute response =~ "Unsubscribe"
   end
 
   test "GET /yayaka with signing in and a yayaka user", %{conn: conn} do
@@ -92,6 +98,9 @@ defmodule Web.YayakaUserControllerTest do
     assert response =~ "Authorize service"
     assert response =~ "Revoke service authorization"
     assert response =~ @yayaka_user.name
+    assert response =~ "Fetch user relations"
+    assert response =~ "Subscribe"
+    assert response =~ "Unsubscribe"
   end
 
   # create-user
@@ -505,6 +514,144 @@ defmodule Web.YayakaUserControllerTest do
       }
       conn = sign_up(conn)
              |> post yayaka_user_path(conn, :revoke_service_authorization), params: params
+      assert redirected_to(conn) == yayaka_user_path(conn, :index)
+      assert get_flash(conn, :error) =~ "error"
+    end
+  end
+
+  # fetch-user-relations
+
+  test "POST /yayaka/fetch-user-relations", %{conn: conn} do
+    user1 = %{host: "host1", id: "id1"}
+    host1 = "host3"
+    user2 = %{host: "host2", id: "id2"}
+    host2 = "host4"
+    social_graph_host = "host5"
+    with_mocks do
+      mock social_graph_host, "fetch-user-relations", fn message ->
+        assert message["payload"]["identity-host"] == @user.host
+        assert message["payload"]["user-id"] == @user.id
+        body = %{
+          "subscriptions" => [
+            %{"identity-host" => user1.host,
+              "user-id" => user1.id,
+              "social-graph-host" => host1}],
+          "subscribers" => [
+            %{"identity-host" => user2.host,
+              "user-id" => user2.id,
+              "social-graph-host" => host2}]
+        }
+        answer = Utils.new_answer(message, body)
+        YMP.MessageGateway.push(answer)
+      end
+      params = %{
+        "host" => social_graph_host}
+      conn = sign_up(conn)
+             |> post yayaka_user_path(conn, :fetch_user_relations), params: params
+      assert redirected_to(conn) == yayaka_user_path(conn, :index)
+      info = get_flash(conn, :info)
+      assert info =~ "host3"
+      assert info =~ "host4"
+      assert info =~ user1.id
+      assert info =~ user2.id
+    end
+  end
+
+  test "POST /yayaka/fetch-user-relations fails", %{conn: conn} do
+    import __MODULE__.Macros
+    with_error "host1", "fetch-user-relations" do
+      params = %{
+        "host" => "host1"}
+      conn = sign_up(conn)
+             |> post yayaka_user_path(conn, :fetch_user_relations), params: params
+      assert redirected_to(conn) == yayaka_user_path(conn, :index)
+      assert get_flash(conn, :error) =~ "error"
+    end
+  end
+
+  # subscribe
+
+  test "POST /yayaka/subscribe", %{conn: conn} do
+    user1 = %{host: "host1", id: "id1"}
+    host1 = "host2"
+    subscriber_host = "host3"
+    with_mocks do
+      mock subscriber_host, "subscribe", fn message ->
+        assert message["payload"]["subscriber-identity-host"] == @user.host
+        assert message["payload"]["subscriber-user-id"] == @user.id
+        assert message["payload"]["publisher-identity-host"] == user1.host
+        assert message["payload"]["publisher-user-id"] == user1.id
+        assert message["payload"]["publisher-social-graph-host"] == host1
+        body = %{}
+        answer = Utils.new_answer(message, body)
+        YMP.MessageGateway.push(answer)
+      end
+      params = %{
+        "subscriber_host" => subscriber_host,
+        "identity_host" => user1.host,
+        "user_id" => user1.id,
+        "publisher_host" => host1}
+      conn = sign_up(conn)
+             |> post yayaka_user_path(conn, :subscribe), params: params
+      assert redirected_to(conn) == yayaka_user_path(conn, :index)
+      assert get_flash(conn, :info) =~ "subscribed"
+    end
+  end
+
+  test "POST /yayaka/subscribe fails", %{conn: conn} do
+    import __MODULE__.Macros
+    with_error "host1", "subscribe" do
+      params = %{
+        "subscriber_host" => "host1",
+        "identity_host" => "host2",
+        "user_id" => "id1",
+        "publisher_host" => "host3"}
+      conn = sign_up(conn)
+             |> post yayaka_user_path(conn, :subscribe), params: params
+      assert redirected_to(conn) == yayaka_user_path(conn, :index)
+      assert get_flash(conn, :error) =~ "error"
+    end
+  end
+
+  # unsubscribe
+
+  test "POST /yayaka/unsubscribe", %{conn: conn} do
+    user1 = %{host: "host1", id: "id1"}
+    host1 = "host2"
+    subscriber_host = "host3"
+    with_mocks do
+      mock subscriber_host, "unsubscribe", fn message ->
+        assert message["payload"]["subscriber-identity-host"] == @user.host
+        assert message["payload"]["subscriber-user-id"] == @user.id
+        assert message["payload"]["publisher-identity-host"] == user1.host
+        assert message["payload"]["publisher-user-id"] == user1.id
+        assert message["payload"]["publisher-social-graph-host"] == host1
+        body = %{}
+        answer = Utils.new_answer(message, body)
+        YMP.MessageGateway.push(answer)
+      end
+      params = %{
+        "subscriber_host" => subscriber_host,
+        "identity_host" => user1.host,
+        "user_id" => user1.id,
+        "publisher_host" => host1}
+      conn = sign_up(conn)
+             |> post yayaka_user_path(conn, :unsubscribe), params: params
+      assert redirected_to(conn) == yayaka_user_path(conn, :index)
+      assert get_flash(conn, :info) =~ "unsubscribed"
+    end
+  end
+
+  test "POST /yayaka/unsubscribe fails", %{conn: conn} do
+    import __MODULE__.Macros
+    with_error "host1", "unsubscribe" do
+      params = %{
+        "subscriber_host" => "host1",
+        "identity_host" => "host2",
+        "user_id" => "id1",
+        "publisher_host" => "host3"}
+      conn = sign_up(conn)
+             |> post yayaka_user_path(conn, :unsubscribe), params: params
       assert redirected_to(conn) == yayaka_user_path(conn, :index)
       assert get_flash(conn, :error) =~ "error"
     end

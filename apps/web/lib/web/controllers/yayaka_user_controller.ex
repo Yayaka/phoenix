@@ -5,8 +5,9 @@ defmodule Web.YayakaUserController do
 
   plug Guardian.Plug.EnsureAuthenticated, %{handler: __MODULE__} when action in [
     :create_user, :update_user_name, :update_user_attributes,
-    :get_token, :authenticate_user, :authorize_service,
-    :revoke_service_authorization]
+    :get_token, :authenticate_user,
+    :authorize_service, :revoke_service_authorization,
+    :fetch_user_relations, :subscribe, :unsubscribe]
 
   def unauthenticated(conn, _params) do
     conn
@@ -46,7 +47,8 @@ defmodule Web.YayakaUserController do
          :update_user_name, :update_user_attributes,
          :fetch_user, :fetch_user_by_name,
          :get_token, :authenticate_user,
-         :authorize_service, :revoke_service_authorization]
+         :authorize_service, :revoke_service_authorization,
+         :fetch_user_relations, :subscribe, :unsubscribe]
     end
     render conn, "index.html", actions: actions, user: cache
   end
@@ -214,6 +216,62 @@ defmodule Web.YayakaUserController do
       :ok ->
         ok(conn, """
         service authorization is revoked.
+        """)
+      _ ->
+        error(conn)
+    end
+  end
+
+  def fetch_user_relations(conn, %{"params" => params}) do
+    user = get_yayaka_user!(conn)
+    %{"host" => host} = params
+    case User.fetch_relations(host, user) do
+      {:ok, subscriptions, subscribers} ->
+        subscriptions = Enum.map(subscriptions, fn {user, host} ->
+          "#{user.id} @ #{user.host} on #{host}"
+        end) |> Enum.join("\n")
+        subscribers = Enum.map(subscribers, fn {user, host} ->
+          "#{user.id} @ #{user.host} on #{host}"
+        end) |> Enum.join("\n")
+        ok(conn, """
+        subscriptions:
+        #{subscriptions}
+        subscribers:
+        #{subscribers}
+        """)
+      _ ->
+        error(conn)
+    end
+  end
+
+  def subscribe(conn, %{"params" => params}) do
+    user = get_yayaka_user!(conn)
+    %{"subscriber_host" => subscriber_host,
+      "identity_host" => identity_host,
+      "user_id" => user_id,
+      "publisher_host" => publisher_host} = params
+    target_user = %{host: identity_host, id: user_id}
+    case User.subscribe(subscriber_host, user, publisher_host, target_user) do
+      :ok ->
+        ok(conn, """
+        subscribed
+        """)
+      _ ->
+        error(conn)
+    end
+  end
+
+  def unsubscribe(conn, %{"params" => params}) do
+    user = get_yayaka_user!(conn)
+    %{"subscriber_host" => subscriber_host,
+      "identity_host" => identity_host,
+      "user_id" => user_id,
+      "publisher_host" => publisher_host} = params
+    target_user = %{host: identity_host, id: user_id}
+    case User.unsubscribe(subscriber_host, user, publisher_host, target_user) do
+      :ok ->
+        ok(conn, """
+        unsubscribed
         """)
       _ ->
         error(conn)
