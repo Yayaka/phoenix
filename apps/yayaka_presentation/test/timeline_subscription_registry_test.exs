@@ -2,7 +2,7 @@ defmodule YayakaPresentation.TimelineSubscriptionRegistryTest do
   use ExUnit.Case
   alias YayakaPresentation.TimelineSubscriptionRegistry
   alias YayakaPresentation.TimelineSubscription
-  import YMP.TestMessageHandler, only: [represent_remote_host: 1]
+  import YMP.TestMessageHandler, only: [with_mocks: 1, mock: 3]
   alias Yayaka.MessageHandler.Utils
   import Ecto.Query
 
@@ -20,35 +20,31 @@ defmodule YayakaPresentation.TimelineSubscriptionRegistryTest do
       id: "id1", user: user, social_graph: social_graph, expires: expires
     } |> DB.Repo.insert!()
     subscription_id = "subscription_id1"
-    represent_remote_host(social_graph.host)
-    task = Task.async(fn ->
-      YMP.TestMessageHandler.register("subscribe-timeline", social_graph.host)
-      receive do
-        message ->
-          assert message["payload"]["expires"] > now
-          assert message["payload"]["identity-host"] == user.host
-          assert message["payload"]["user-id"] == user.id
-          assert message["payload"]["limit"] == 0
-          body = %{
-            "subscription-id" => subscription_id,
-            "expires" => now + 1000,
-            "events" => []}
-          answer = Utils.new_answer(message, body)
-          YMP.MessageGateway.push(answer)
+    with_mocks do
+      mock social_graph.host, "subscribe-timeline", fn message ->
+        assert message["payload"]["expires"] > now
+        assert message["payload"]["identity-host"] == user.host
+        assert message["payload"]["user-id"] == user.id
+        assert message["payload"]["limit"] == 0
+        body = %{
+          "subscription-id" => subscription_id,
+          "expires" => now + 1000,
+          "events" => []}
+        answer = Utils.new_answer(message, body)
+        YMP.MessageGateway.push(answer)
       end
-    end)
-    assert {:ok, subscription, []} =
-      TimelineSubscriptionRegistry.subscribe(social_graph.host, user)
-    query = from s in TimelineSubscription,
-      where: s.user == ^user,
-      where: s.social_graph == ^social_graph,
-      where: s.expires > ^now
-    assert subscription == DB.Repo.one(query)
-    assert subscription.id == subscription_id
-    assert subscription.expires == now + 1000
-    assert [{self(), :ok}] ==
-      Registry.lookup(TimelineSubscriptionRegistry, subscription.id)
-    assert :ok == Task.await(task)
+      assert {:ok, subscription, []} =
+        TimelineSubscriptionRegistry.subscribe(social_graph.host, user)
+      query = from s in TimelineSubscription,
+        where: s.user == ^user,
+        where: s.social_graph == ^social_graph,
+        where: s.expires > ^now
+      assert subscription == DB.Repo.one(query)
+      assert subscription.id == subscription_id
+      assert subscription.expires == now + 1000
+      assert [{self(), :ok}] ==
+        Registry.lookup(TimelineSubscriptionRegistry, subscription.id)
+    end
   end
 
   test "subscribe with an available subscription" do
@@ -74,25 +70,21 @@ defmodule YayakaPresentation.TimelineSubscriptionRegistryTest do
     %TimelineSubscription{
       id: subscription_id, user: user, social_graph: social_graph, expires: expires
     } |> DB.Repo.insert!()
-    represent_remote_host(social_graph.host)
-    task = Task.async(fn ->
-      YMP.TestMessageHandler.register("unsubscribe-timeline", social_graph.host)
-      receive do
-        message ->
-          assert message["payload"]["subscription-id"] == subscription_id
-          body = %{}
-          answer = Utils.new_answer(message, body)
-          YMP.MessageGateway.push(answer)
+    with_mocks do
+      mock social_graph.host, "unsubscribe-timeline", fn message ->
+        assert message["payload"]["subscription-id"] == subscription_id
+        body = %{}
+        answer = Utils.new_answer(message, body)
+        YMP.MessageGateway.push(answer)
       end
-    end)
-    assert :ok ==
-      TimelineSubscriptionRegistry.unsubscribe(social_graph.host, user)
-    query = from s in TimelineSubscription,
-      where: s.user == ^user,
-      where: s.social_graph == ^social_graph,
-      where: s.expires > ^now
-    assert 0 == DB.Repo.aggregate(query, :count, :id)
-    assert :ok == Task.await(task)
+      assert :ok ==
+        TimelineSubscriptionRegistry.unsubscribe(social_graph.host, user)
+      query = from s in TimelineSubscription,
+        where: s.user == ^user,
+        where: s.social_graph == ^social_graph,
+        where: s.expires > ^now
+      assert 0 == DB.Repo.aggregate(query, :count, :id)
+    end
   end
 
   test "extend" do
@@ -104,27 +96,22 @@ defmodule YayakaPresentation.TimelineSubscriptionRegistryTest do
     %TimelineSubscription{
       id: subscription_id, user: user, social_graph: social_graph, expires: expires
     } |> DB.Repo.insert!()
-    represent_remote_host(social_graph.host)
-    task = Task.async(fn ->
-      YMP.TestMessageHandler.register("extend-timeline-subscription",
-                                      social_graph.host)
-      receive do
-        message ->
-          assert message["payload"]["subscription-id"] == subscription_id
-          assert message["payload"]["expires"] > now
-          body = %{"expires" => message["payload"]["expires"]}
-          answer = Utils.new_answer(message, body)
-          YMP.MessageGateway.push(answer)
+    with_mocks do
+      mock social_graph.host, "extend-timeline-subscription", fn message ->
+        assert message["payload"]["subscription-id"] == subscription_id
+        assert message["payload"]["expires"] > now
+        body = %{"expires" => message["payload"]["expires"]}
+        answer = Utils.new_answer(message, body)
+        YMP.MessageGateway.push(answer)
       end
-    end)
-    assert :ok ==
-      TimelineSubscriptionRegistry.extend(social_graph.host, user)
-    query = from s in TimelineSubscription,
-      where: s.user == ^user,
-      where: s.social_graph == ^social_graph,
-      where: s.expires > ^now
-    assert DB.Repo.one!(query).expires > expires
-    assert :ok == Task.await(task)
+      assert :ok ==
+        TimelineSubscriptionRegistry.extend(social_graph.host, user)
+      query = from s in TimelineSubscription,
+        where: s.user == ^user,
+        where: s.social_graph == ^social_graph,
+        where: s.expires > ^now
+      assert DB.Repo.one!(query).expires > expires
+    end
   end
 
   test "push_event" do
