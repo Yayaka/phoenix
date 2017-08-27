@@ -2,6 +2,7 @@ defmodule YayakaPresentation.User do
   alias YayakaPresentation.User
   alias YayakaPresentation.PresentationUser
   alias YayakaPresentation.UserLink
+  alias Yayaka.YayakaUserCache
   import Comeonin.Bcrypt, only: [hashpwsalt: 1, checkpw: 2, dummy_checkpw: 0]
   import Ecto.Query
 
@@ -124,6 +125,7 @@ defmodule YayakaPresentation.User do
       {:ok, answer} ->
         %{"user-name" => user_name} = answer["payload"]["body"]
         suggestions = Map.get(answer["payload"]["body"], "suggestions", [])
+        YayakaUserCache.delete(user)
         {:ok, user_name, suggestions}
       _ ->
         :error
@@ -140,6 +142,7 @@ defmodule YayakaPresentation.User do
                               payload, "yayaka", "presentation")
     case YMP.MessageGateway.request(message) do
       {:ok, answer} ->
+        YayakaUserCache.delete(user)
         :ok
       _ ->
         :error

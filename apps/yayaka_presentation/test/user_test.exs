@@ -206,8 +206,14 @@ defmodule YayakaPresentation.UserTest do
         answer = Utils.new_answer(message, body)
         YMP.MessageGateway.push(answer)
       end
+      cache = %Yayaka.YayakaUser{
+        id: user.id, host: user.host, name: "name1",
+        attributes: [], authorized_services: []
+      }
+      Cachex.set(:yayaka_user, user, cache)
       assert {:ok, new_user_name, []} ==
         User.update_user_name(user, new_user_name)
+      assert {:missing, nil} == Cachex.get(:yayaka_user, user)
     end
   end
 
@@ -225,7 +231,13 @@ defmodule YayakaPresentation.UserTest do
         answer = Utils.new_answer(message, body)
         YMP.MessageGateway.push(answer)
       end
+      cache = %Yayaka.YayakaUser{
+        id: user.id, host: user.host, name: "name1",
+        attributes: [], authorized_services: []
+      }
+      Cachex.set(:yayaka_user, user, cache)
       assert :ok == User.update_user_attributes(user, attributes)
+      assert {:missing, nil} == Cachex.get(:yayaka_user, user)
     end
   end
 
