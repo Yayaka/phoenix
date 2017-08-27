@@ -389,7 +389,7 @@ defmodule YayakaSocialGraph.MessageHandler do
         "sender-host" => sender_host,
         "created-at" => created_at}
       push_event = YMP.Message.new(subscription.presentation.host,
-                                   "yayaka", "social-graph", "push-event",
+                                   "yayaka", "presentation", "push-event",
                                    payload, "yayaka", "social-graph")
       YMP.MessageGateway.push(push_event)
     end)

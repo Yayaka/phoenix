@@ -522,6 +522,7 @@ defmodule YayakaSocialGraph.MessageHandlerTest do
       YMP.TestMessageHandler.register("push-event", "host1")
       receive do
         message ->
+          assert message["service"] == "presentation"
           assert message["payload"] == Map.put(event,
                                                "subscription-id",
                                                timeline_subscriber.id)
