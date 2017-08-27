@@ -31,6 +31,8 @@ defmodule Web.Router do
     get "/logout", SessionController, :delete
     get "/switch-user", SessionController, :switch
 
+    get "/timeline", EventController, :timeline
+
     scope "/yayaka" do
       get "/", YayakaUserController, :index
       post "/create-user", YayakaUserController, :create_user

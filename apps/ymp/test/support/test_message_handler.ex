@@ -18,11 +18,12 @@ defmodule YMP.TestMessageHandler do
   defmacro with_mocks(do: block) do
     quote do
       {:ok, var!(agent, YMP.TestMessageHandler)} = Agent.start_link(fn -> [] end)
-      unquote(block)
+      result = unquote(block)
       Agent.get(var!(agent, YMP.TestMessageHandler), fn state -> state end)
       |> Enum.each(fn task ->
         assert {:ok, :ok} == Task.yield(task, 10)
       end)
+      result
     end
   end
 

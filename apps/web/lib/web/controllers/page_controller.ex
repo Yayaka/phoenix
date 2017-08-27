@@ -1,6 +1,5 @@
 defmodule Web.PageController do
   use Web, :controller
-  alias YayakaPresentation.User
 
   def index(conn, _params) do
     render conn, "index.html"

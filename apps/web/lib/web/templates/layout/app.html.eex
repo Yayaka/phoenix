@@ -51,6 +51,8 @@
       <pre class="ui message" role="alert"><%= get_flash(@conn, :info) %></pre>
       <pre class="ui message" role="alert"><%= get_flash(@conn, :error) %></pre>
 
+      <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g=" crossorigin="anonymous"></script>
+
       <main role="main" class="ui basic segment">
         <div class="ui container">
           <%= render @view_module, @view_template, assigns %>
@@ -58,8 +60,6 @@
       </main>
 
     </div>
-    <script src="<%= static_path(@conn, "/js/app.js") %>"></script>
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/semantic-ui/2.2.10/semantic.min.js" integrity="sha256-97Q90i72uoJfYtVnO2lQcLjbjBySZjLHx50DYhCBuJo=" crossorigin="anonymous"></script>
     <script>
       $('.ui.dropdown').dropdown();

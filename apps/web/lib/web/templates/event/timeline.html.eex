@@ -1,0 +1,65 @@
+<%
+user = get_yayaka_user(@conn)
+user_id = if not is_nil(user), do: user.id, else: ""
+%>
+<h2>Timeline</h2>
+<%= if is_nil(@conn.assigns[:token]) do %>
+<div class="ui segment">
+  <% opts = [as: :timeline, method: :get, class: "ui form"] %>
+  <%= form_for @conn, event_path(@conn, :timeline), opts, fn f -> %>
+    <div class="field">
+      <%= label f, :social_graph_host, "Social Graph host" %>
+      <%= text_input f, :social_graph_host, value: YMP.get_host() %>
+    </div>
+    <div class="field">
+      <%= label f, :identity_host, "Identity host" %>
+      <%= text_input f, :identity_host, value: YMP.get_host() %>
+    </div>
+    <div class="field">
+      <%= label f, :user_id, "User ID" %>
+      <%= text_input f, :user_id, value: user_id %>
+    </div>
+    <%= submit "Show", class: "ui primary button" %>
+  <% end %>
+</div>
+<% else %>
+<div class="ui segment">
+  <form id="event" class="ui form">
+    <div class="field">
+      <label for="repository_host">Repository host</label>
+      <input type="text" id="repository_host" name="repositor_host" value="<%= YMP.get_host() %>">
+    </div>
+    <div class="field">
+      <label for="protocol">Protocol</label>
+      <input type="text" id="protocol" name="protocol" value="yayaka">
+    </div>
+    <div class="field">
+      <label for="type">Type</label>
+      <input type="text" id="type" name="type" value="post">
+    </div>
+    <div class="field">
+      <label for="body">Body</label>
+      <textarea id="body" name="body" rows="11">
+{
+  "contents": [
+    {
+      "protocol": "yayaka",
+      "type": "plaintext",
+      "body": {
+        "text": ""
+      }
+    }
+  ]
+}
+      </textarea>
+    </div>
+    <%= submit "Submit", class: "ui primary button" %>
+  </form>
+</div>
+<div id="timeline" class="ui list">
+</div>
+<script>
+window.timelineToken = "<%= @token %>"
+</script>
+<script src="<%= static_path(@conn, "/js/app.js") %>"></script>
+<% end %>
