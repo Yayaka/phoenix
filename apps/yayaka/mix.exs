@@ -21,7 +21,7 @@ defmodule Yayaka.Mixfile do
 
   defp deps do
     [{:db, in_umbrella: true},
-     {:ymp, in_umbrella: true},
+     {:amorphos, in_umbrella: true},
      {:cachex, "~> 2.1"}]
   end
 end

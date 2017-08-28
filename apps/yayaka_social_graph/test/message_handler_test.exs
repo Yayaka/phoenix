@@ -9,7 +9,7 @@ defmodule YayakaSocialGraph.MessageHandlerTest do
   alias YayakaSocialGraph.TimelineSubscriber
   alias Yayaka.MessageHandler.Utils
   import Ecto.Query
-  import YMP.TestMessageHandler, only: [request: 2, request: 3,
+  import Amorphos.TestMessageHandler, only: [request: 2, request: 3,
                                         represent_remote_host: 1,
                                         with_mocks: 1, mock: 3]
 
@@ -21,11 +21,11 @@ defmodule YayakaSocialGraph.MessageHandlerTest do
     :ok
   end
 
-  @host YMP.get_host()
+  @host Amorphos.get_host()
   @handler YayakaSocialGraph.MessageHandler
 
   def create_message(action, payload, sender_service \\ "presentation") do
-    YMP.Message.new(@host,
+    Amorphos.Message.new(@host,
                     "yayaka", "social-graph", action, payload,
                     "yayaka", sender_service)
   end
@@ -70,7 +70,7 @@ defmodule YayakaSocialGraph.MessageHandlerTest do
         assert id2 == user2.id
         body = %{}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       payload = %{
         "subscriber-identity-host" => "host1",
@@ -116,7 +116,7 @@ defmodule YayakaSocialGraph.MessageHandlerTest do
         assert id2 == user2.id
         body = %{}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       subscription = %Subscription{
         user: %{host: "host1", id: user.id},
@@ -511,7 +511,7 @@ defmodule YayakaSocialGraph.MessageHandlerTest do
       "sender-host" => @host,
       "created-at" => DateTime.utc_now() |> DateTime.to_iso8601()}
     spawn_link(fn ->
-      YMP.TestMessageHandler.register("fetch-user")
+      Amorphos.TestMessageHandler.register("fetch-user")
       receive do
         message ->
           YayakaIdentity.MessageHandler.handle(message)
@@ -519,7 +519,7 @@ defmodule YayakaSocialGraph.MessageHandlerTest do
     end)
     represent_remote_host("host1")
     task = Task.async(fn ->
-      YMP.TestMessageHandler.register("push-event", "host1")
+      Amorphos.TestMessageHandler.register("push-event", "host1")
       receive do
         message ->
           assert message["service"] == "presentation"

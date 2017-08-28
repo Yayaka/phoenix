@@ -1,6 +1,6 @@
 defmodule YayakaPresentation.EventTest do
   use ExUnit.Case
-  import YMP.TestMessageHandler, only: [with_mocks: 1, mock: 3]
+  import Amorphos.TestMessageHandler, only: [with_mocks: 1, mock: 3]
   alias Yayaka.MessageHandler.Utils
   alias YayakaPresentation.Event
 
@@ -31,7 +31,7 @@ defmodule YayakaPresentation.EventTest do
         assert message["payload"]["body"] == event["body"]
         body = %{"event-id" => created_event_id}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       assert {:ok, created_event_id} == Event.create(user, repository_host, event)
     end
@@ -57,7 +57,7 @@ defmodule YayakaPresentation.EventTest do
         assert message["payload"]["event-id"] == event_id
         body = event
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       assert {:ok, event} == Event.fetch(repository_host, event_id)
     end

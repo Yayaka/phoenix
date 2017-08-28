@@ -82,10 +82,10 @@ defmodule YayakaPresentation.User do
     payload = %{
       "user-name" => name,
       "attributes" => attributes}
-    message = YMP.Message.new(identity_host,
+    message = Amorphos.Message.new(identity_host,
                               "yayaka", "identity", "create-user",
                               payload, "yayaka", "presentation")
-    with {:ok, answer} <- YMP.MessageGateway.request(message),
+    with {:ok, answer} <- Amorphos.MessageGateway.request(message),
          %{"user-id" => user_id,
            "user-name" => user_name} <- answer["payload"]["body"],
          user <- %{host: identity_host, id: user_id},
@@ -100,10 +100,10 @@ defmodule YayakaPresentation.User do
   def check_user_name_availability(identity_host, name) do
     payload = %{
       "user-name" => name}
-    message = YMP.Message.new(identity_host,
+    message = Amorphos.Message.new(identity_host,
                               "yayaka", "identity", "check-user-name-availability",
                               payload, "yayaka", "presentation")
-    case YMP.MessageGateway.request(message) do
+    case Amorphos.MessageGateway.request(message) do
       {:ok, answer} ->
         %{"availability" => availability} = answer["payload"]["body"]
         suggestions = Map.get(answer["payload"]["body"], "suggestions", [])
@@ -118,10 +118,10 @@ defmodule YayakaPresentation.User do
     payload = %{
       "user-id" => user.id,
       "user-name" => new_name}
-    message = YMP.Message.new(user.host,
+    message = Amorphos.Message.new(user.host,
                               "yayaka", "identity", "update-user-name",
                               payload, "yayaka", "presentation")
-    case YMP.MessageGateway.request(message) do
+    case Amorphos.MessageGateway.request(message) do
       {:ok, answer} ->
         %{"user-name" => user_name} = answer["payload"]["body"]
         suggestions = Map.get(answer["payload"]["body"], "suggestions", [])
@@ -137,10 +137,10 @@ defmodule YayakaPresentation.User do
     payload = %{
       "user-id" => user.id,
       "attributes" => attributes}
-    message = YMP.Message.new(user.host,
+    message = Amorphos.Message.new(user.host,
                               "yayaka", "identity", "update-user-attributes",
                               payload, "yayaka", "presentation")
-    case YMP.MessageGateway.request(message) do
+    case Amorphos.MessageGateway.request(message) do
       {:ok, answer} ->
         YayakaUserCache.delete(user)
         :ok
@@ -153,10 +153,10 @@ defmodule YayakaPresentation.User do
   def fetch(user) do
     payload = %{
       "user-id" => user.id}
-    message = YMP.Message.new(user.host,
+    message = Amorphos.Message.new(user.host,
                               "yayaka", "identity", "fetch-user",
                               payload, "yayaka", "presentation")
-    case YMP.MessageGateway.request(message) do
+    case Amorphos.MessageGateway.request(message) do
       {:ok, answer} ->
         %{"user-name" => user_name,
           "attributes" => attributes,
@@ -171,10 +171,10 @@ defmodule YayakaPresentation.User do
   def fetch_by_name(identity_host, name) do
     payload = %{
       "user-name" => name}
-    message = YMP.Message.new(identity_host,
+    message = Amorphos.Message.new(identity_host,
                               "yayaka", "identity", "fetch-user-by-name",
                               payload, "yayaka", "presentation")
-    case YMP.MessageGateway.request(message) do
+    case Amorphos.MessageGateway.request(message) do
       {:ok, answer} ->
         %{"user-id" => user_id,
           "attributes" => attributes,
@@ -190,10 +190,10 @@ defmodule YayakaPresentation.User do
     payload = %{
       "user-id" => user.id,
       "presentation-host" => presentation_host}
-    message = YMP.Message.new(user.host,
+    message = Amorphos.Message.new(user.host,
                               "yayaka", "identity", "get-token",
                               payload, "yayaka", "presentation")
-    case YMP.MessageGateway.request(message) do
+    case Amorphos.MessageGateway.request(message) do
       {:ok, answer} ->
         %{"token" => token,
           "expires" => expires} = answer["payload"]["body"]
@@ -208,10 +208,10 @@ defmodule YayakaPresentation.User do
     payload = %{
       "user-id" => user.id,
       "token" => token}
-    message = YMP.Message.new(user.host,
+    message = Amorphos.Message.new(user.host,
                               "yayaka", "identity", "authenticate-user",
                               payload, "yayaka", "presentation")
-    with {:ok, _answer} <- YMP.MessageGateway.request(message),
+    with {:ok, _answer} <- Amorphos.MessageGateway.request(message),
          {:ok, _link} <- insert_user_link(presentation_user, user) do
       :ok
     else
@@ -226,10 +226,10 @@ defmodule YayakaPresentation.User do
       "user-id" => user.id,
       "host" => service.host,
       "service" => service.service}
-    message = YMP.Message.new(user.host,
+    message = Amorphos.Message.new(user.host,
                               "yayaka", "identity", "authorize-service",
                               payload, "yayaka", "presentation")
-    case YMP.MessageGateway.request(message) do
+    case Amorphos.MessageGateway.request(message) do
       {:ok, _answer} -> :ok
       _ -> :error
     end
@@ -242,10 +242,10 @@ defmodule YayakaPresentation.User do
       "user-id" => user.id,
       "host" => service.host,
       "service" => service.service}
-    message = YMP.Message.new(user.host,
+    message = Amorphos.Message.new(user.host,
                               "yayaka", "identity", "revoke-service-authorization",
                               payload, "yayaka", "presentation")
-    case YMP.MessageGateway.request(message) do
+    case Amorphos.MessageGateway.request(message) do
       {:ok, _answer} -> :ok
       _ -> :error
     end
@@ -256,10 +256,10 @@ defmodule YayakaPresentation.User do
     payload = %{
       "identity-host" => user.host,
       "user-id" => user.id}
-    message = YMP.Message.new(host,
+    message = Amorphos.Message.new(host,
                               "yayaka", "social-graph", "fetch-user-relations",
                               payload, "yayaka", "presentation")
-    case YMP.MessageGateway.request(message) do
+    case Amorphos.MessageGateway.request(message) do
       {:ok, answer} ->
         %{"subscriptions" => subscriptions,
           "subscribers" => subscribers} = answer["payload"]["body"]
@@ -287,10 +287,10 @@ defmodule YayakaPresentation.User do
       "publisher-identity-host" => target_user.host,
       "publisher-user-id" => target_user.id,
       "publisher-social-graph-host" => target_host}
-    message = YMP.Message.new(host,
+    message = Amorphos.Message.new(host,
                               "yayaka", "social-graph", "subscribe",
                               payload, "yayaka", "presentation")
-    case YMP.MessageGateway.request(message) do
+    case Amorphos.MessageGateway.request(message) do
       {:ok, _answer} -> :ok
       _ -> :error
     end
@@ -304,10 +304,10 @@ defmodule YayakaPresentation.User do
       "publisher-identity-host" => target_user.host,
       "publisher-user-id" => target_user.id,
       "publisher-social-graph-host" => target_host}
-    message = YMP.Message.new(host,
+    message = Amorphos.Message.new(host,
                               "yayaka", "social-graph", "unsubscribe",
                               payload, "yayaka", "presentation")
-    case YMP.MessageGateway.request(message) do
+    case Amorphos.MessageGateway.request(message) do
       {:ok, _answer} -> :ok
       _ -> :error
     end

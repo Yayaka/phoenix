@@ -7,10 +7,10 @@ defmodule Yayaka.YayakaUserCache do
       {:ok, cache} -> {:ok, cache}
       {:missing, _} ->
         payload = %{"user-id" => user.id}
-        message = YMP.Message.new(user.host,
+        message = Amorphos.Message.new(user.host,
                                   "yayaka", "identity", "fetch-user",
                                   payload, "yayaka", "presentation")
-        case YMP.MessageGateway.request(message) do
+        case Amorphos.MessageGateway.request(message) do
           {:ok, answer} ->
             %{"user-name" => user_name,
               "attributes" => attributes,
@@ -65,10 +65,10 @@ defmodule Yayaka.YayakaUserCache do
 
   defp fetch_by_name(host, name) do
     payload = %{"user-name" => name}
-    message = YMP.Message.new(host,
+    message = Amorphos.Message.new(host,
                               "yayaka", "identity", "fetch-user-by-name",
                               payload, "yayaka", "presentation")
-    case YMP.MessageGateway.request(message) do
+    case Amorphos.MessageGateway.request(message) do
       {:ok, answer} ->
         %{"user-id" => user_id,
           "attributes" => attributes,

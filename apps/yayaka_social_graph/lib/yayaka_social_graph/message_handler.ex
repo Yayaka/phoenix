@@ -1,5 +1,5 @@
 defmodule YayakaSocialGraph.MessageHandler do
-  @behaviour YMP.MessageHandler
+  @behaviour Amorphos.MessageHandler
 
   alias YayakaIdentity.IdentityUser
   alias YayakaIdentity.UserAttribute
@@ -53,10 +53,10 @@ defmodule YayakaSocialGraph.MessageHandler do
       "subscriber-user-id" => subscriber.id,
       "publisher-identity-host" => publisher.host,
       "publisher-user-id" => publisher.id}
-    add_subscriber = YMP.Message.new(publisher_social_graph_host,
+    add_subscriber = Amorphos.Message.new(publisher_social_graph_host,
                               "yayaka", "social-graph", "add-subscriber",
                               payload, "yayaka", "social-graph")
-    {:ok, answer} = YMP.MessageGateway.request(add_subscriber)
+    {:ok, answer} = Amorphos.MessageGateway.request(add_subscriber)
     if answer["payload"]["body"] == %{} do
       params = %{
         user: subscriber,
@@ -67,7 +67,7 @@ defmodule YayakaSocialGraph.MessageHandler do
       DB.Repo.insert!(changeset)
       body = %{}
       answer = Utils.new_answer(message, body)
-      YMP.MessageGateway.push(answer)
+      Amorphos.MessageGateway.push(answer)
     end
   end
 
@@ -101,15 +101,15 @@ defmodule YayakaSocialGraph.MessageHandler do
       "subscriber-user-id" => subscriber.id,
       "publisher-identity-host" => publisher.host,
       "publisher-user-id" => publisher.id}
-    remove_subscriber = YMP.Message.new(publisher_social_graph_host,
+    remove_subscriber = Amorphos.Message.new(publisher_social_graph_host,
                               "yayaka", "social-graph", "remove-subscriber",
                               payload, "yayaka", "social-graph")
-    {:ok, answer} = YMP.MessageGateway.request(remove_subscriber)
+    {:ok, answer} = Amorphos.MessageGateway.request(remove_subscriber)
     if answer["payload"]["body"] == %{} do
       DB.Repo.delete!(subscription)
       body = %{}
       answer = Utils.new_answer(message, body)
-      YMP.MessageGateway.push(answer)
+      Amorphos.MessageGateway.push(answer)
     end
   end
 
@@ -142,7 +142,7 @@ defmodule YayakaSocialGraph.MessageHandler do
     DB.Repo.insert!(changeset)
     body = %{}
     answer = Utils.new_answer(message, body)
-    YMP.MessageGateway.push(answer)
+    Amorphos.MessageGateway.push(answer)
   end
 
   def handle(%{"action" => "remove-subscriber"} = message) do
@@ -168,7 +168,7 @@ defmodule YayakaSocialGraph.MessageHandler do
     DB.Repo.delete!(subscriber)
     body = %{}
     answer = Utils.new_answer(message, body)
-    YMP.MessageGateway.push(answer)
+    Amorphos.MessageGateway.push(answer)
   end
 
   def handle(%{"action" => "fetch-user-relations"} = message) do
@@ -196,7 +196,7 @@ defmodule YayakaSocialGraph.MessageHandler do
       "subscriptions" => subscriptions,
       "subscribers" => subscribers}
     answer = Utils.new_answer(message, body)
-    YMP.MessageGateway.push(answer)
+    Amorphos.MessageGateway.push(answer)
   end
 
   defp fetch_timeline(identity_host, user_id, limit) do
@@ -228,7 +228,7 @@ defmodule YayakaSocialGraph.MessageHandler do
     events = fetch_timeline(identity_host, user_id, limit)
     body = %{"events" => events}
     answer = Utils.new_answer(message, body)
-    YMP.MessageGateway.push(answer)
+    Amorphos.MessageGateway.push(answer)
   end
 
   defp assert_expires(expires) do
@@ -254,7 +254,7 @@ defmodule YayakaSocialGraph.MessageHandler do
     subscriber = DB.Repo.insert!(changeset)
     body = %{"subscription-id" => subscriber.id, "events" => events, "expires" => expires}
     answer = Utils.new_answer(message, body)
-    YMP.MessageGateway.push(answer)
+    Amorphos.MessageGateway.push(answer)
   end
 
   def handle(%{"action" => "unsubscribe-timeline"} = message) do
@@ -267,7 +267,7 @@ defmodule YayakaSocialGraph.MessageHandler do
     |> DB.Repo.delete!()
     body = %{}
     answer = Utils.new_answer(message, body)
-    YMP.MessageGateway.push(answer)
+    Amorphos.MessageGateway.push(answer)
   end
 
   def handle(%{"action" => "extend-timeline-subscription"} = message) do
@@ -283,7 +283,7 @@ defmodule YayakaSocialGraph.MessageHandler do
     DB.Repo.update!(changeset)
     body = %{"expires" => expires}
     answer = Utils.new_answer(message, body)
-    YMP.MessageGateway.push(answer)
+    Amorphos.MessageGateway.push(answer)
   end
 
   def handle(%{"action" => "broadcast-event",
@@ -314,14 +314,14 @@ defmodule YayakaSocialGraph.MessageHandler do
         "body" => body,
         "sender-host" => sender_host,
         "created-at" => created_at}
-      push_event = YMP.Message.new(subscriber.social_graph.host,
+      push_event = Amorphos.Message.new(subscriber.social_graph.host,
                                    "yayaka", "social-graph", "broadcast-event",
                                    payload, "yayaka", "social-graph")
-      YMP.MessageGateway.push(push_event)
+      Amorphos.MessageGateway.push(push_event)
     end)
     body = %{}
     answer = Utils.new_answer(message, body)
-    YMP.MessageGateway.push(answer)
+    Amorphos.MessageGateway.push(answer)
   end
 
   def handle(%{"action" => "broadcast-event",
@@ -388,13 +388,13 @@ defmodule YayakaSocialGraph.MessageHandler do
         "body" => body,
         "sender-host" => sender_host,
         "created-at" => created_at}
-      push_event = YMP.Message.new(subscription.presentation.host,
+      push_event = Amorphos.Message.new(subscription.presentation.host,
                                    "yayaka", "presentation", "push-event",
                                    payload, "yayaka", "social-graph")
-      YMP.MessageGateway.push(push_event)
+      Amorphos.MessageGateway.push(push_event)
     end)
     body = %{}
     answer = Utils.new_answer(message, body)
-    YMP.MessageGateway.push(answer)
+    Amorphos.MessageGateway.push(answer)
   end
 end

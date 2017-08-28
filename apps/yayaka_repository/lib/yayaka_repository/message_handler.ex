@@ -1,5 +1,5 @@
 defmodule YayakaRepository.MessageHandler do
-  @behaviour YMP.MessageHandler
+  @behaviour Amorphos.MessageHandler
 
   alias YayakaIdentity.IdentityUser
   alias YayakaIdentity.UserAttribute
@@ -39,7 +39,7 @@ defmodule YayakaRepository.MessageHandler do
     |> Enum.each(fn subscription ->
       %{"repository-host" => repository_host,
         "social-graph-host" => social_graph_host} = subscription
-      if repository_host == YMP.get_host() do
+      if repository_host == Amorphos.get_host() do
         payload = %{
           "repository-host" => @host,
           "event-id" => event.id,
@@ -50,17 +50,17 @@ defmodule YayakaRepository.MessageHandler do
           "body" => event.body,
           "sender-host" => event.sender.host,
           "created-at" => Utils.to_datetime(event.inserted_at)}
-        message = YMP.Message.new(social_graph_host,
+        message = Amorphos.Message.new(social_graph_host,
                                   "yayaka", "social-graph", "broadcast-event",
                                   payload, "yayaka", "repository")
-        YMP.MessageGateway.request(message)
+        Amorphos.MessageGateway.request(message)
       end
     end)
     body = %{
       "event-id" => event.id
     }
     answer = Utils.new_answer(message, body)
-    YMP.MessageGateway.push(answer)
+    Amorphos.MessageGateway.push(answer)
   end
 
   def handle(%{"action" => "fetch-event"} = message) do
@@ -73,8 +73,8 @@ defmodule YayakaRepository.MessageHandler do
           "status" => "not-found",
           "body" => %{}
         }
-        answer = YMP.Message.new_answer(message, payload)
-        YMP.MessageGateway.push(answer)
+        answer = Amorphos.Message.new_answer(message, payload)
+        Amorphos.MessageGateway.push(answer)
       event ->
         body = %{
           "identity-host" => event.user.host,
@@ -85,7 +85,7 @@ defmodule YayakaRepository.MessageHandler do
           "sender-host" => event.sender.host,
           "created-at" => Utils.to_datetime(event.inserted_at)}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
     end
   end
 end

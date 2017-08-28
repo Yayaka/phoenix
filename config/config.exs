@@ -44,14 +44,14 @@ https_token = %{
 }
 
 if Mix.env == :test do
-  config :ymp, :host_information, %{
+  config :amorphos, :host_information, %{
     "ymp-version" => "0.1.0",
     "connection-protocols" => [https_token],
     "service_protocols" => [yayaka]
   }
 end
 
-config :ymp, HTTPSTokenConnection, https_token
+config :amorphos, HTTPSTokenConnection, https_token
 
 reducer = fn subprotocol, {user_attributes, event_types, content_types, notification_types} ->
   name = subprotocol["name"]
@@ -75,10 +75,10 @@ config :yayaka,
   max_timeline_subscription_length: max_timeline_subscription_length,
   max_notification_subscription_length: max_notification_subscription_length
 
-config :ymp, :connection_protocols, %{
+config :amorphos, :connection_protocols, %{
   "https-token" => %{module: YMP.HTTPSTokenConnection}}
 
-config :ymp, :service_protocols,
+config :amorphos, :service_protocols,
   %{"yayaka" => %{module: Yayaka.MessageHandler, answer_validation: true}}
 
 config :yayaka, :message_handlers, %{

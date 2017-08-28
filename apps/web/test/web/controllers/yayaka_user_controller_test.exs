@@ -1,6 +1,6 @@
 defmodule Web.YayakaUserControllerTest do
   use Web.ConnCase
-  import YMP.TestMessageHandler, only: [with_mocks: 1, mock: 3]
+  import Amorphos.TestMessageHandler, only: [with_mocks: 1, mock: 3]
   alias Yayaka.MessageHandler.Utils
 
   @user %{host: "hostx", id: "idx"}
@@ -19,8 +19,8 @@ defmodule Web.YayakaUserControllerTest do
         with_mocks do
           mock host, unquote(action), fn message ->
             payload = %{"status" => "error", "body" => %{}}
-            answer = YMP.Message.new_answer(message, payload)
-            YMP.MessageGateway.push(answer)
+            answer = Amorphos.Message.new_answer(message, payload)
+            Amorphos.MessageGateway.push(answer)
           end
           unquote(block)
         end
@@ -122,7 +122,7 @@ defmodule Web.YayakaUserControllerTest do
           "user-id" => created_user_id,
           "user-name" => created_user_name}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       params = %{
         "host" => identity_host,
@@ -164,7 +164,7 @@ defmodule Web.YayakaUserControllerTest do
           "availability" => true,
           "suggestions" => suggestions}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       params = %{
         "host" => identity_host,
@@ -204,7 +204,7 @@ defmodule Web.YayakaUserControllerTest do
           "user-name" => new_user_name,
           "suggestions" => suggestions}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       params = %{
         "name" => new_user_name
@@ -242,7 +242,7 @@ defmodule Web.YayakaUserControllerTest do
         assert message["payload"]["attributes"] == [attribute]
         body = %{}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       params = %{
         "protocol" => attribute["protocol"],
@@ -290,7 +290,7 @@ defmodule Web.YayakaUserControllerTest do
           "attributes" => attributes,
           "authorized-services" => authorized_services}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       params = %{
         "host" => @user.host,
@@ -336,7 +336,7 @@ defmodule Web.YayakaUserControllerTest do
           "attributes" => attributes,
           "authorized-services" => authorized_services}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       params = %{
         "host" => @user.host,
@@ -377,7 +377,7 @@ defmodule Web.YayakaUserControllerTest do
           "token" => token,
           "expires" => expires}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       params = %{
         "host" => presentation_host,
@@ -414,7 +414,7 @@ defmodule Web.YayakaUserControllerTest do
         assert message["payload"]["token"] == token
         body = %{}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       params = %{
         "host" => @user.host,
@@ -454,7 +454,7 @@ defmodule Web.YayakaUserControllerTest do
         assert message["payload"]["service"] == service.service
         body = %{}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       params = %{
         "host" => service.host,
@@ -492,7 +492,7 @@ defmodule Web.YayakaUserControllerTest do
         assert message["payload"]["service"] == service.service
         body = %{}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       params = %{
         "host" => service.host,
@@ -542,7 +542,7 @@ defmodule Web.YayakaUserControllerTest do
               "social-graph-host" => host2}]
         }
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       params = %{
         "host" => social_graph_host}
@@ -584,7 +584,7 @@ defmodule Web.YayakaUserControllerTest do
         assert message["payload"]["publisher-social-graph-host"] == host1
         body = %{}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       params = %{
         "subscriber_host" => subscriber_host,
@@ -628,7 +628,7 @@ defmodule Web.YayakaUserControllerTest do
         assert message["payload"]["publisher-social-graph-host"] == host1
         body = %{}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       params = %{
         "subscriber_host" => subscriber_host,

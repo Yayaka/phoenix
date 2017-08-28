@@ -2,7 +2,7 @@ defmodule Yayaka.YayakaUserCacheTest do
   use ExUnit.Case
   alias Yayaka.YayakaUserCache
   alias Yayaka.YayakaUser
-  import YMP.TestMessageHandler, only: [with_mocks: 1, mock: 3]
+  import Amorphos.TestMessageHandler, only: [with_mocks: 1, mock: 3]
   alias Yayaka.MessageHandler.Utils
 
   setup do
@@ -43,7 +43,7 @@ defmodule Yayaka.YayakaUserCacheTest do
           "attributes" => cache.attributes,
           "authorized-services" => cache.authorized_services}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       assert {:ok, cache} == YayakaUserCache.get_or_fetch(user)
       assert {:ok, cache} == Cachex.get(:yayaka_user, user)
@@ -98,7 +98,7 @@ defmodule Yayaka.YayakaUserCacheTest do
           "attributes" => cache.attributes,
           "authorized-services" => cache.authorized_services}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       assert {:ok, cache} == YayakaUserCache.get_or_fetch_by_name(user.host, cache.name)
       assert {:ok, cache} == Cachex.get(:yayaka_user, user)

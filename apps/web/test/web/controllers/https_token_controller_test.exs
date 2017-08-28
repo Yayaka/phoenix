@@ -6,11 +6,11 @@ defmodule Web.HTTPSTokenControllerTest do
   setup do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(DB.Repo)
     bypass = Bypass.open
-    host_information = %YMP.HostInformation{
+    host_information = %Amorphos.HostInformation{
       host: "localhost:#{bypass.port}",
-      ymp_version: "0.1.0",
+      amorphos_version: "0.1.0",
       connection_protocols: [
-        %YMP.HostInformation.ConnectionProtocol{
+        %Amorphos.HostInformation.ConnectionProtocol{
           name: "https-token",
           version: "0.1.0",
           parameters: %{
@@ -25,7 +25,7 @@ defmodule Web.HTTPSTokenControllerTest do
     {:ok, bypass: bypass, info: host_information}
   end
 
-  test "POST /api/ymp/https-token/request", %{bypass: bypass, info: info} do
+  test "POST /api/amorphos/https-token/request", %{bypass: bypass, info: info} do
     DB.Repo.insert(info)
     state = "aaaa"
     Bypass.expect_once bypass, "POST", "/grant", fn conn ->
@@ -35,7 +35,7 @@ defmodule Web.HTTPSTokenControllerTest do
       {:ok, claims} = Guardian.decode_and_verify(token)
       assert {:ok, %{"host" => info.host}} == Guardian.serializer.from_token(claims["sub"])
       assert {"content-type", "application/json"} in conn.req_headers
-      assert body["host"]  == YMP.get_host()
+      assert body["host"]  == Amorphos.get_host()
       assert body["expires"] > DateTime.utc_now() |> DateTime.to_unix()
       assert body["state"] == state
       conn
@@ -47,11 +47,11 @@ defmodule Web.HTTPSTokenControllerTest do
     } |> Poison.encode!()
     conn = build_conn()
            |> put_req_header("content-type", "application/json")
-           |> post "/api/ymp/https-token/request", body
+           |> post "/api/amorphos/https-token/request", body
     assert response(conn, 204) == ""
   end
 
-  test "POST /api/ymp/https-token/grant", %{bypass: bypass, info: info} do
+  test "POST /api/amorphos/https-token/grant", %{bypass: bypass, info: info} do
     DB.Repo.insert(info)
     state = "aaaa"
 
@@ -60,7 +60,7 @@ defmodule Web.HTTPSTokenControllerTest do
       {:ok, body, conn} = Plug.Conn.read_body(conn)
       body = Poison.decode!(body)
       assert {"content-type", "application/json"} in conn.req_headers
-      assert Map.get(body, "host") == YMP.get_host()
+      assert Map.get(body, "host") == Amorphos.get_host()
       assert Map.get(body, "state") |> String.length() >= 1
       resp_body = %{
         "host" => info.host,
@@ -70,28 +70,28 @@ defmodule Web.HTTPSTokenControllerTest do
       } |> Poison.encode!()
         conn2 = build_conn()
                 |> put_req_header("content-type", "application/json")
-                |> post "/api/ymp/https-token/grant", resp_body
+                |> post "/api/amorphos/https-token/grant", resp_body
         assert response(conn2, 204) == ""
       conn
       |> Plug.Conn.resp(204, "")
     end
 
-    {:ok, connection} = YMP.HTTPSTokenConnection.connect(info)
+    {:ok, connection} = Amorphos.HTTPSTokenConnection.connect(info)
     assert connection.token == token
     assert connection.expires > DateTime.utc_now() |> DateTime.to_unix()
     assert connection.host_information.host == info.host
   end
 
-  test "POST /api/ymp/https-token/packet", %{bypass: bypass, info: info} do
+  test "POST /api/amorphos/https-token/packet", %{bypass: bypass, info: info} do
     action = "web-https-token-controller-packet"
-    YMP.TestMessageHandler.register(action)
+    Amorphos.TestMessageHandler.register(action)
     host = "host1"
     message = %{"sender" => %{
       "host" => host,
       "protocol" => "protocol1",
       "service" => "service1"},
     "id" => "a",
-    "host" => YMP.get_host(),
+    "host" => Amorphos.get_host(),
     "protocol" => "test",
     "service" => "service2",
     "action" => action,
@@ -106,7 +106,7 @@ defmodule Web.HTTPSTokenControllerTest do
     conn = build_conn()
            |> put_req_header("content-type", "application/json")
            |> put_req_header("authorization", "Bearer #{token}")
-           |> post "/api/ymp/https-token/packet", body
+           |> post "/api/amorphos/https-token/packet", body
     assert response(conn, 204) == ""
     assert_receive(message)
   end

@@ -3,9 +3,9 @@ defmodule YayakaPresentation.MessageHandlerTest do
   alias Yayaka.MessageHandler.Utils
   alias YayakaPresentation.TimelineSubscriptionRegistry
   alias YayakaPresentation.TimelineSubscription
-  import YMP.TestMessageHandler, only: [request: 2, request: 3]
+  import Amorphos.TestMessageHandler, only: [request: 2, request: 3]
 
-  @host YMP.get_host()
+  @host Amorphos.get_host()
   @handler YayakaPresentation.MessageHandler
 
   setup do
@@ -46,7 +46,7 @@ defmodule YayakaPresentation.MessageHandlerTest do
       "sender-host" => "host2",
       "created-at" => DateTime.utc_now() |> DateTime.to_iso8601()}
     push_event =
-      YMP.Message.new(@host,
+      Amorphos.Message.new(@host,
                       "yayaka", "presentation", "push-event", payload,
                       "yayaka", "social-graph")
     {:ok, answer} = request(@handler, push_event)

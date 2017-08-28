@@ -24,10 +24,10 @@ defmodule YayakaPresentation.TimelineSubscriptionRegistry do
           "user-id" => user.id,
           "limit" => limit}
         subscribe_timeline =
-          YMP.Message.new(social_graph_host,
+          Amorphos.Message.new(social_graph_host,
                           "yayaka", "social-graph", "subscribe-timeline",
                           payload, "yayaka", "presentation")
-        {:ok, answer} = YMP.MessageGateway.request(subscribe_timeline)
+        {:ok, answer} = Amorphos.MessageGateway.request(subscribe_timeline)
         %{"subscription-id" => subscription_id,
           "expires" => expires,
           "events" => events} = answer["payload"]["body"]
@@ -47,10 +47,10 @@ defmodule YayakaPresentation.TimelineSubscriptionRegistry do
             "user-id" => user.id,
             "limit" => limit}
           subscribe_timeline =
-            YMP.Message.new(social_graph_host,
+            Amorphos.Message.new(social_graph_host,
                             "yayaka", "social-graph", "fetch-timeline",
                             payload, "yayaka", "presentation")
-          {:ok, answer} = YMP.MessageGateway.request(subscribe_timeline)
+          {:ok, answer} = Amorphos.MessageGateway.request(subscribe_timeline)
           %{"events" => events} = answer["payload"]["body"]
           events
         else
@@ -74,10 +74,10 @@ defmodule YayakaPresentation.TimelineSubscriptionRegistry do
     DB.Repo.delete!(subscription)
     payload = %{"subscription-id" => subscription.id}
     unsubscribe_timeline =
-      YMP.Message.new(social_graph_host,
+      Amorphos.Message.new(social_graph_host,
                       "yayaka", "social-graph", "unsubscribe-timeline",
                       payload, "yayaka", "presentation")
-    {:ok, _answer} = YMP.MessageGateway.request(unsubscribe_timeline)
+    {:ok, _answer} = Amorphos.MessageGateway.request(unsubscribe_timeline)
     :ok
   after
     :error
@@ -95,10 +95,10 @@ defmodule YayakaPresentation.TimelineSubscriptionRegistry do
       "subscription-id" => subscription.id,
       "expires" => now + @expires_in}
     extend_timeline_subscription =
-      YMP.Message.new(social_graph_host,
+      Amorphos.Message.new(social_graph_host,
                       "yayaka", "social-graph", "extend-timeline-subscription",
                       payload, "yayaka", "presentation")
-    {:ok, answer} = YMP.MessageGateway.request(extend_timeline_subscription)
+    {:ok, answer} = Amorphos.MessageGateway.request(extend_timeline_subscription)
     %{"expires" => expires} = answer["payload"]["body"]
     changeset = TimelineSubscription.changeset(subscription, %{expires: expires})
     DB.Repo.update!(changeset)

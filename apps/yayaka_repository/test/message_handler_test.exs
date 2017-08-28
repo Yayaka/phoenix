@@ -6,7 +6,7 @@ defmodule YayakaRepository.MessageHandlerTest do
   alias YayakaRepository.Event
   alias Yayaka.MessageHandler.Utils
   import Ecto.Query
-  import YMP.TestMessageHandler, only: [request: 2, request: 3]
+  import Amorphos.TestMessageHandler, only: [request: 2, request: 3]
 
   setup do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(DB.Repo)
@@ -16,11 +16,11 @@ defmodule YayakaRepository.MessageHandlerTest do
     :ok
   end
 
-  @host YMP.get_host()
+  @host Amorphos.get_host()
   @handler YayakaRepository.MessageHandler
 
   def create_message(action, payload, sender_service \\ "presentation") do
-    YMP.Message.new(@host,
+    Amorphos.Message.new(@host,
                     "yayaka", "repository", action, payload,
                     "yayaka", sender_service)
   end
@@ -59,19 +59,19 @@ defmodule YayakaRepository.MessageHandlerTest do
     authorization = authorize(user)
 
     spawn_link(fn ->
-      YMP.TestMessageHandler.register("fetch-user")
+      Amorphos.TestMessageHandler.register("fetch-user")
       receive do
         message ->
           YayakaIdentity.MessageHandler.handle(message)
       end
     end)
     spawn_link(fn ->
-      YMP.TestMessageHandler.register("broadcast-event")
+      Amorphos.TestMessageHandler.register("broadcast-event")
       receive do
         message ->
           send pid, message
           answer = Utils.new_answer(message, %{})
-          YMP.MessageGateway.push(answer)
+          Amorphos.MessageGateway.push(answer)
       end
     end)
     payload = %{

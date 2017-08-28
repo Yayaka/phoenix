@@ -9,11 +9,11 @@ user_id = if not is_nil(user), do: user.id, else: ""
   <%= form_for @conn, event_path(@conn, :timeline), opts, fn f -> %>
     <div class="field">
       <%= label f, :social_graph_host, "Social Graph host" %>
-      <%= text_input f, :social_graph_host, value: YMP.get_host() %>
+      <%= text_input f, :social_graph_host, value: Amorphos.get_host() %>
     </div>
     <div class="field">
       <%= label f, :identity_host, "Identity host" %>
-      <%= text_input f, :identity_host, value: YMP.get_host() %>
+      <%= text_input f, :identity_host, value: Amorphos.get_host() %>
     </div>
     <div class="field">
       <%= label f, :user_id, "User ID" %>
@@ -27,7 +27,7 @@ user_id = if not is_nil(user), do: user.id, else: ""
   <form id="event" class="ui form">
     <div class="field">
       <label for="repository_host">Repository host</label>
-      <input type="text" id="repository_host" name="repositor_host" value="<%= YMP.get_host() %>">
+      <input type="text" id="repository_host" name="repositor_host" value="<%= Amorphos.get_host() %>">
     </div>
     <div class="field">
       <label for="protocol">Protocol</label>

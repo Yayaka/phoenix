@@ -2,7 +2,7 @@ defmodule YayakaPresentation.TimelineSubscriptionRegistryTest do
   use ExUnit.Case
   alias YayakaPresentation.TimelineSubscriptionRegistry
   alias YayakaPresentation.TimelineSubscription
-  import YMP.TestMessageHandler, only: [with_mocks: 1, mock: 3]
+  import Amorphos.TestMessageHandler, only: [with_mocks: 1, mock: 3]
   alias Yayaka.MessageHandler.Utils
   import Ecto.Query
 
@@ -44,7 +44,7 @@ defmodule YayakaPresentation.TimelineSubscriptionRegistryTest do
           "expires" => now + 1000,
           "events" => [@event]}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       assert {:ok, subscription, [@event]} =
         TimelineSubscriptionRegistry.subscribe(social_graph.host, user, 10)
@@ -89,7 +89,7 @@ defmodule YayakaPresentation.TimelineSubscriptionRegistryTest do
         assert message["payload"]["limit"] == 10
         body = %{"events" => [@event]}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       assert {:ok, subscription, [@event]} ==
         TimelineSubscriptionRegistry.subscribe(social_graph.host, user, 10)
@@ -112,7 +112,7 @@ defmodule YayakaPresentation.TimelineSubscriptionRegistryTest do
         assert message["payload"]["subscription-id"] == subscription_id
         body = %{}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       assert :ok ==
         TimelineSubscriptionRegistry.unsubscribe(social_graph.host, user)
@@ -139,7 +139,7 @@ defmodule YayakaPresentation.TimelineSubscriptionRegistryTest do
         assert message["payload"]["expires"] > now
         body = %{"expires" => message["payload"]["expires"]}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       assert :ok ==
         TimelineSubscriptionRegistry.extend(social_graph.host, user)

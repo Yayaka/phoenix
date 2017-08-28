@@ -33,7 +33,7 @@ defmodule Web.Mixfile do
   # Type `mix help deps` for examples and options.
   defp deps do
     [{:db, in_umbrella: true},
-     {:ymp, in_umbrella: true},
+     {:amorphos, in_umbrella: true},
      {:yayaka, in_umbrella: true},
      {:yayaka_identity, in_umbrella: true},
      {:yayaka_repository, in_umbrella: true},

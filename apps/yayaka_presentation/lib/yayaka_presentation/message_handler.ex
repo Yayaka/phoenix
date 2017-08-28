@@ -1,5 +1,5 @@
 defmodule YayakaPresentation.MessageHandler do
-  @behaviour YMP.MessageHandler
+  @behaviour Amorphos.MessageHandler
 
   alias YayakaPresentation.TimelineSubscriptionRegistry
   alias Yayaka.MessageHandler.Utils
@@ -19,6 +19,6 @@ defmodule YayakaPresentation.MessageHandler do
     TimelineSubscriptionRegistry.push_event(subscription_id, event)
     body = %{}
     answer = Utils.new_answer(message, body)
-    YMP.MessageGateway.push(answer)
+    Amorphos.MessageGateway.push(answer)
   end
 end

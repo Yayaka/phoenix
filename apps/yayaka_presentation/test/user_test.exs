@@ -1,6 +1,6 @@
 defmodule YayakaPresentation.UserTest do
   use ExUnit.Case
-  import YMP.TestMessageHandler, only: [with_mocks: 1, mock: 3]
+  import Amorphos.TestMessageHandler, only: [with_mocks: 1, mock: 3]
   alias Yayaka.MessageHandler.Utils
   alias YayakaPresentation.User
   alias YayakaPresentation.PresentationUser
@@ -111,7 +111,7 @@ defmodule YayakaPresentation.UserTest do
           "user-id" => created_user_id,
           "user-name" => created_user_name}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       {:ok, %{host: identity_host, id: created_user_id}, created_user_name} =
         User.create(presentation_user, identity_host, user_name, attributes)
@@ -133,7 +133,7 @@ defmodule YayakaPresentation.UserTest do
           "availability" => true,
           "suggestions" => suggestions}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       {:ok, true, suggestions} =
         User.check_user_name_availability(identity_host, user_name)
@@ -144,7 +144,7 @@ defmodule YayakaPresentation.UserTest do
         body = %{
           "availability" => true}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       {:ok, true, []} =
         User.check_user_name_availability(identity_host, user_name)
@@ -162,7 +162,7 @@ defmodule YayakaPresentation.UserTest do
           "availability" => false,
           "suggestions" => suggestions}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       {:ok, false, suggestions} =
         User.check_user_name_availability(identity_host, user_name)
@@ -173,7 +173,7 @@ defmodule YayakaPresentation.UserTest do
         body = %{
           "availability" => false}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       {:ok, false, []} =
         User.check_user_name_availability(identity_host, user_name)
@@ -192,7 +192,7 @@ defmodule YayakaPresentation.UserTest do
           "user-name" => new_user_name,
           "suggestions" => suggestions}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       assert {:ok, new_user_name, suggestions} ==
         User.update_user_name(user, new_user_name)
@@ -204,7 +204,7 @@ defmodule YayakaPresentation.UserTest do
         body = %{
           "user-name" => new_user_name}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       cache = %Yayaka.YayakaUser{
         id: user.id, host: user.host, name: "name1",
@@ -229,7 +229,7 @@ defmodule YayakaPresentation.UserTest do
         assert message["payload"]["attributes"] == attributes
         body = %{}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       cache = %Yayaka.YayakaUser{
         id: user.id, host: user.host, name: "name1",
@@ -260,7 +260,7 @@ defmodule YayakaPresentation.UserTest do
           "attributes" => attributes,
           "authorized-services" => authorized_services}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       assert {:ok,
         user_name,
@@ -288,7 +288,7 @@ defmodule YayakaPresentation.UserTest do
           "attributes" => attributes,
           "authorized-services" => authorized_services}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       assert {:ok,
         user.id,
@@ -310,7 +310,7 @@ defmodule YayakaPresentation.UserTest do
           "token" => token,
           "expires" => expires}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       assert {:ok, token, expires} == User.get_token(user, presentation_host)
     end
@@ -329,7 +329,7 @@ defmodule YayakaPresentation.UserTest do
         assert message["payload"]["token"] == token
         body = %{}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       assert :ok == User.authenticate_user(presentation_user, user, token)
       query = from l in UserLink,
@@ -348,7 +348,7 @@ defmodule YayakaPresentation.UserTest do
         assert message["payload"]["service"] == "social-graph"
         body = %{}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       assert :ok == User.authorize_service(user, service)
     end
@@ -364,7 +364,7 @@ defmodule YayakaPresentation.UserTest do
         assert message["payload"]["service"] == "social-graph"
         body = %{}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       assert :ok == User.revoke_service_authorization(user, service)
     end
@@ -392,7 +392,7 @@ defmodule YayakaPresentation.UserTest do
               "social-graph-host" => host2}]
         }
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       assert {:ok, [{user1, host1}], [{user2, host2}]} ==
         User.fetch_relations(host, user)
@@ -413,7 +413,7 @@ defmodule YayakaPresentation.UserTest do
         assert message["payload"]["publisher-social-graph-host"] == host2
         body = %{}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       assert :ok == User.subscribe(host1, user1, host2, user2)
     end
@@ -433,7 +433,7 @@ defmodule YayakaPresentation.UserTest do
         assert message["payload"]["publisher-social-graph-host"] == host2
         body = %{}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       assert :ok == User.unsubscribe(host1, user1, host2, user2)
     end

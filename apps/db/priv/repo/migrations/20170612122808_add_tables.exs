@@ -2,12 +2,12 @@ defmodule DB.Repo.Migrations.AddTables do
   use Ecto.Migration
 
   def change do
-    # YMP
+    # Amorphos
 
     create table(:host_informations, primary_key: false) do
       add :host, :string, primary_key: true
 
-      add :ymp_version, :string
+      add :amorphos_version, :string
       add :connection_protocols, {:array, :map}
       add :service_protocols, {:array, :map}
 

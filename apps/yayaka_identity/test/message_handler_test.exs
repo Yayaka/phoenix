@@ -4,18 +4,18 @@ defmodule YayakaIdentity.MessageHandlerTest do
   alias YayakaIdentity.IdentityUser
   alias YayakaIdentity.AuthorizedService
   import Ecto.Query
-  import YMP.TestMessageHandler, only: [request: 2, request: 3]
+  import Amorphos.TestMessageHandler, only: [request: 2, request: 3]
 
   setup do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(DB.Repo)
     Ecto.Adapters.SQL.Sandbox.mode(DB.Repo, {:shared, self()})
   end
 
-  @host YMP.get_host()
+  @host Amorphos.get_host()
   @handler YayakaIdentity.MessageHandler
 
   def create_message(action, payload) do
-    YMP.Message.new(@host,
+    Amorphos.Message.new(@host,
                     "yayaka", "identity", action, payload,
                     "yayaka", "presentation")
   end

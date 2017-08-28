@@ -54,7 +54,7 @@ defmodule Web.Router do
   scope "/api", Web do
     pipe_through [:api, :api_auth]
 
-    scope "/ymp" do
+    scope "/amorphos" do
       scope "/https-token" do
         post "/request", HTTPSTokenController, :request
         post "/grant", HTTPSTokenController, :grant

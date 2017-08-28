@@ -1,5 +1,5 @@
 defmodule YayakaIdentity.MessageHandler do
-  @behaviour YMP.MessageHandler
+  @behaviour Amorphos.MessageHandler
 
   alias YayakaIdentity.IdentityUser
   alias YayakaIdentity.UserAttribute
@@ -49,7 +49,7 @@ defmodule YayakaIdentity.MessageHandler do
       "user-name" => identity_user.name
     }
     answer = Utils.new_answer(message, body)
-    YMP.MessageGateway.push(answer)
+    Amorphos.MessageGateway.push(answer)
   end
 
   def handle(%{"action" => "check-user-name-availability"} = message) do
@@ -60,7 +60,7 @@ defmodule YayakaIdentity.MessageHandler do
       "availability" => availability
     }
     answer = Utils.new_answer(message, body)
-    YMP.MessageGateway.push(answer)
+    Amorphos.MessageGateway.push(answer)
   end
 
   def handle(%{"action" => "update-user-name"} = message) do
@@ -82,7 +82,7 @@ defmodule YayakaIdentity.MessageHandler do
       "user-name" => user.name
     }
     answer = Utils.new_answer(message, body)
-    YMP.MessageGateway.push(answer)
+    Amorphos.MessageGateway.push(answer)
   end
 
   def handle(%{"action" => "update-user-attributes"} = message) do
@@ -121,7 +121,7 @@ defmodule YayakaIdentity.MessageHandler do
     end)
     {:ok, _result} = DB.Repo.transaction(multi)
     answer = Utils.new_answer(message, %{})
-    YMP.MessageGateway.push(answer)
+    Amorphos.MessageGateway.push(answer)
   end
 
   def handle(%{"action" => "fetch-user"} = message) do
@@ -149,7 +149,7 @@ defmodule YayakaIdentity.MessageHandler do
       "attributes" => attributes,
       "authorized-services" => authorized_services}
     answer = Utils.new_answer(message, body)
-    YMP.MessageGateway.push(answer)
+    Amorphos.MessageGateway.push(answer)
   end
 
   def handle(%{"action" => "fetch-user-by-name"} = message) do
@@ -177,7 +177,7 @@ defmodule YayakaIdentity.MessageHandler do
       "attributes" => attributes,
       "authorized-services" => authorized_services}
     answer = Utils.new_answer(message, body)
-    YMP.MessageGateway.push(answer)
+    Amorphos.MessageGateway.push(answer)
   end
 
   def handle(%{"action" => "get-token"} = message) do
@@ -193,7 +193,7 @@ defmodule YayakaIdentity.MessageHandler do
       "expires" => expires
     }
     answer = Utils.new_answer(message, body)
-    YMP.MessageGateway.push(answer)
+    Amorphos.MessageGateway.push(answer)
   end
 
   def handle(%{"action" => "authenticate-user"} = message) do
@@ -211,7 +211,7 @@ defmodule YayakaIdentity.MessageHandler do
       authorized_service = DB.Repo.insert!(changeset)
     end
     answer = Utils.new_answer(message, %{})
-    YMP.MessageGateway.push(answer)
+    Amorphos.MessageGateway.push(answer)
   end
 
   def handle(%{"action" => "authorize-service"} = message) do
@@ -229,7 +229,7 @@ defmodule YayakaIdentity.MessageHandler do
       authorized_service = DB.Repo.insert!(changeset)
     end
     answer = Utils.new_answer(message, %{})
-    YMP.MessageGateway.push(answer)
+    Amorphos.MessageGateway.push(answer)
   end
 
   def handle(%{"action" => "revoke-service-authorization"} = message) do
@@ -244,6 +244,6 @@ defmodule YayakaIdentity.MessageHandler do
       where: a.service == ^service
     DB.Repo.delete_all(query)
     answer = Utils.new_answer(message, %{})
-    YMP.MessageGateway.push(answer)
+    Amorphos.MessageGateway.push(answer)
   end
 end

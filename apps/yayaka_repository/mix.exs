@@ -21,7 +21,7 @@ defmodule YayakaRepository.Mixfile do
 
   defp deps do
     [{:db, in_umbrella: true},
-     {:ymp, in_umbrella: true},
+     {:amorphos, in_umbrella: true},
      {:yayaka, in_umbrella: true},
      {:yayaka_identity, in_umbrella: true, only: :test},
      {:ex_json_schema, "~> 0.5.5"}]

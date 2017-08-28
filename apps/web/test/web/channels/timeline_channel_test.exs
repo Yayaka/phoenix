@@ -1,7 +1,7 @@
 defmodule Web.TimelineChannelTest do
   use Web.ChannelCase
   alias Web.TimelineChannel
-  import YMP.TestMessageHandler, only: [with_mocks: 1, mock: 3]
+  import Amorphos.TestMessageHandler, only: [with_mocks: 1, mock: 3]
   alias Yayaka.MessageHandler.Utils
 
   @assigns %{
@@ -21,7 +21,7 @@ defmodule Web.TimelineChannelTest do
           "expires" => now + 1000,
           "events" => []}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       {:ok, _, socket} =
         socket(nil, @assigns)
@@ -51,7 +51,7 @@ defmodule Web.TimelineChannelTest do
         assert message["payload"]["body"] == event["body"]
         body = %{"event-id" => created_event_id}
         answer = Utils.new_answer(message, body)
-        YMP.MessageGateway.push(answer)
+        Amorphos.MessageGateway.push(answer)
       end
       socket = create_socket()
       message = %{
