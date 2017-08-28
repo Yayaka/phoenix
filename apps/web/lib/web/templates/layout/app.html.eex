@@ -24,7 +24,7 @@
           <%= if user do %>
             <div class="ui dropdown item">
               <%= if yayaka_user do %>
-                <div class="text"><%= yayaka_user.id %>@<%= yayaka_user.host %></div>
+                <div class="text"><%= render_user(yayaka_user) %></div>
               <% else %>
                 <div class="text"><%= user.name %></div>
               <% end %>
@@ -35,7 +35,7 @@
                   <% host = link.user.host %>
                   <% id = link.user.id %>
                   <a class="item" href="<%= session_path(@conn, :switch, host: host, id: id) %>">
-                    <%= "#{id} @ #{host}" %>
+                    <%= render_user(link.user) %>
                   </a>
                 <% end %>
                 <a class="item" href="<%= session_path(@conn, :delete) %>">Sign out</a>

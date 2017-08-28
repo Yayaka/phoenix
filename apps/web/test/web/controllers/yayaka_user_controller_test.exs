@@ -75,7 +75,7 @@ defmodule Web.YayakaUserControllerTest do
     assert response =~ "Fetch user"
     assert response =~ "Fetch user by name"
     refute response =~ "Get token"
-    refute response =~ "Authenticate user"
+    assert response =~ "Authenticate user"
     refute response =~ "Authorize service"
     refute response =~ "Revoke service authorization"
     refute response =~ "Fetch user relations"
@@ -380,8 +380,7 @@ defmodule Web.YayakaUserControllerTest do
         Amorphos.MessageGateway.push(answer)
       end
       params = %{
-        "host" => presentation_host,
-        "id" => @user.id
+        "host" => presentation_host
       }
       conn = sign_up(conn)
              |> post yayaka_user_path(conn, :get_token), params: params

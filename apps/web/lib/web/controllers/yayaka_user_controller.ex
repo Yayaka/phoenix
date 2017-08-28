@@ -39,9 +39,12 @@ defmodule Web.YayakaUserController do
     end
     actions = case {presentation_user, user} do
       {nil, _} ->
-        [:check_user_name_availability, :fetch_user, :fetch_user_by_name]
+        [:check_user_name_availability,
+         :fetch_user, :fetch_user_by_name]
       {_, nil} ->
-        [:create_user, :check_user_name_availability, :fetch_user, :fetch_user_by_name]
+        [:create_user, :check_user_name_availability,
+         :fetch_user, :fetch_user_by_name,
+         :authenticate_user]
       _ ->
         [:create_user, :check_user_name_availability,
          :update_user_name, :update_user_attributes,
