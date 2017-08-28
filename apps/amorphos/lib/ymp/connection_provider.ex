@@ -16,7 +16,7 @@ defmodule Amorphos.ConnectionProvider do
           _ -> :error
         end
       connection ->
-        if Amorphos.Connection.check_expired(connection) do
+        if Amorphos.Connection.expires?(connection) do
           GenServer.cast(__MODULE__, {:delete, host})
           connect(host_information)
         else
@@ -62,7 +62,7 @@ defmodule Amorphos.ConnectionProvider do
 
   def handle_cast(:prune_expired, state) do
     connections = Enum.filter(state.connections, fn {_host, connection} ->
-      not Amorphos.Connection.check_expired(connection)
+      not Amorphos.Connection.expires?(connection)
     end) |> Enum.into(%{})
     state = %{state | connections: connections}
     {:noreply, state}

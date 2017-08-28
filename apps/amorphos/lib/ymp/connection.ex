@@ -18,7 +18,7 @@ defmodule Amorphos.Connection do
   @doc """
   Checks whether the connection is expired or not.
   """
-  @callback check_expired(connection :: struct) :: true | false
+  @callback expires?(connection :: struct) :: true | false
 
   def get_common_connection_protocol(host_information) do
     case get_common_connection_protocols(host_information) do
@@ -34,8 +34,8 @@ defmodule Amorphos.Connection do
     end)
   end
 
-  def check_expired(connection) do
-    apply(connection.__struct__, :check_expired, [connection])
+  def expires?(connection) do
+    apply(connection.__struct__, :expires?, [connection])
   end
 
   def send_packet(connection, messages) do

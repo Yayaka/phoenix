@@ -46,7 +46,7 @@ defmodule Amorphos.ConnectionTest do
     def connect(_host_information), do: {:ok, %__MODULE__{}}
     def send_packet(_connection, _messages), do: :ok
     def validate(%Amorphos.HostInformation.ConnectionProtocol{}), do: true
-    def check_expired(_connection), do: true
+    def expires?(_connection), do: true
   end
   defmodule B do
     @behaviour Amorphos.Connection
@@ -54,12 +54,12 @@ defmodule Amorphos.ConnectionTest do
     def connect(_host_information), do: {:ok, %__MODULE__{}}
     def send_packet(_connection, _messages), do: :error
     def validate(%Amorphos.HostInformation.ConnectionProtocol{}), do: true
-    def check_expired(_connection), do: false
+    def expires?(_connection), do: false
   end
 
-  test "check_expired" do
-    assert Amorphos.Connection.check_expired(%A{})
-    refute Amorphos.Connection.check_expired(%B{})
+  test "expires?" do
+    assert Amorphos.Connection.expires?(%A{})
+    refute Amorphos.Connection.expires?(%B{})
   end
 
   test "send_packet" do

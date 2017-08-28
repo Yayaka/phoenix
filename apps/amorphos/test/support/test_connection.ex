@@ -23,5 +23,5 @@ defmodule Amorphos.TestConnection do
     :ok
   end
   def validate(%Amorphos.HostInformation.ConnectionProtocol{}), do: true
-  def check_expired(connection), do: false
+  def expires?(connection), do: false
 end

@@ -92,21 +92,21 @@ defmodule Amorphos.HTTPSTokenConnectionTest do
     refute Amorphos.HTTPSTokenConnection.validate(invalid)
   end
 
-  test "check_expired", %{info: info} do
+  test "expires?", %{info: info} do
     token = "aaaa"
     now = DateTime.utc_now() |> DateTime.to_unix()
-    not_expired = %Amorphos.HTTPSTokenConnection{
-      host_information: info,
-      token: token,
-      expires: now + 1000
-    }
     expired = %Amorphos.HTTPSTokenConnection{
       host_information: info,
       token: token,
       expires: now - 1000
     }
-    assert Amorphos.HTTPSTokenConnection.check_expired(expired)
-    refute Amorphos.HTTPSTokenConnection.check_expired(not_expired)
+    not_expired = %Amorphos.HTTPSTokenConnection{
+      host_information: info,
+      token: token,
+      expires: now + 1000
+    }
+    assert Amorphos.HTTPSTokenConnection.expires?(expired)
+    refute Amorphos.HTTPSTokenConnection.expires?(not_expired)
   end
 
   test "send_packet", %{bypass: bypass, info: info} do

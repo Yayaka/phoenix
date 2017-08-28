@@ -7,7 +7,7 @@ defmodule Amorphos.ConnectionProviderTest do
     def connect(_host_information), do: {:ok, %__MODULE__{id: UUID.uuid4()}}
     def send_packet(_connection, _messages), do: :error
     def validate(%Amorphos.HostInformation.ConnectionProtocol{}), do: true
-    def check_expired(_connection), do: true
+    def expires?(_connection), do: true
   end
   defmodule B do
     @behaviour Amorphos.Connection
@@ -15,7 +15,7 @@ defmodule Amorphos.ConnectionProviderTest do
     def connect(_host_information), do: {:ok, %__MODULE__{id: UUID.uuid4()}}
     def send_packet(_connection, _messages), do: :error
     def validate(%Amorphos.HostInformation.ConnectionProtocol{}), do: true
-    def check_expired(_connection), do: false
+    def expires?(_connection), do: false
   end
 
   @host_a1 %Amorphos.HostInformation{

@@ -12,7 +12,7 @@ defmodule Amorphos.HTTPSTokenConnection do
   end
 
   @impl Amorphos.Connection
-  def check_expired(connection) do
+  def expires?(connection) do
     expires = connection.expires
     now = DateTime.utc_now() |> DateTime.to_unix()
     expires <= now
