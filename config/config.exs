@@ -37,9 +37,9 @@ https_token = %{
   name: "https-token",
   version: "0.1.0",
   parameters: %{
-    "request-path" => "/api/ymp/https-token/request",
-    "grant-path" => "/api/ymp/https-token/grant",
-    "packet-path" => "/api/ymp/https-token/packet"
+    "request-path" => "/api/amorphos/https-token/request",
+    "grant-path" => "/api/amorphos/https-token/grant",
+    "packet-path" => "/api/amorphos/https-token/packet"
   }
 }
 
