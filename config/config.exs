@@ -74,7 +74,7 @@ config :yayaka,
   max_notification_subscription_length: max_notification_subscription_length
 
 config :amorphos, :connection_protocols, %{
-  "https-token" => %{module: YMP.HTTPSTokenConnection}}
+  "https-token" => %{module: Amorphos.HTTPSTokenConnection}}
 
 config :amorphos, :service_protocols,
   %{"yayaka" => %{module: Yayaka.MessageHandler, answer_validation: true}}
