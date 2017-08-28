@@ -3,7 +3,7 @@ defmodule Amorphos.HTTPSTokenConnection do
 
   defstruct [:host_information, :token, :expires]
 
-  if Mix.env == :test do
+  if Mix.env in [:test, :dev] do
     @timeout 100
     @scheme "http"
   else
@@ -131,7 +131,7 @@ defmodule Amorphos.HTTPSTokenConnection do
 
   def handle_packet(resource, packet) do
     myhost = Amorphos.get_host()
-    with %{host: host} <- resource,
+    with %{"host" => host} <- resource,
          %{"messages" => messages} <- packet do
       for message <- messages do
         if message["host"] == myhost and message["sender"]["host"] == host do

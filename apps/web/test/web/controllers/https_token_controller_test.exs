@@ -99,7 +99,9 @@ defmodule Web.HTTPSTokenControllerTest do
       "text" => "text1"
     }}
     body = %{
-      messages: [message]
+      packet: %{
+        messages: [message]
+      }
     }
     resource = %{host: host}
     {:ok, token, _claims} = Guardian.encode_and_sign(resource)

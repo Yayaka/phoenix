@@ -35,13 +35,13 @@ defmodule Web.HTTPSTokenController do
     with resource <- Guardian.Plug.current_resource(conn),
          ["application/json"] <- get_req_header(conn, "content-type"),
          %{"packet" => packet} = body <- conn.params,
-         :ok <- Amorphos.HTTPSTokenConnection.handle_packet(resource, body) do
+         :ok <- Amorphos.HTTPSTokenConnection.handle_packet(resource, packet) do
       conn
       |> Plug.Conn.resp(204, "")
     else
       _ ->
         conn
-        |> Plug.Conn.resp(204, "")
+        |> Plug.Conn.resp(500, "")
     end
   end
 

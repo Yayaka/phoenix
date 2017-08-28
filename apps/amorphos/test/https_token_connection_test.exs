@@ -193,7 +193,7 @@ defmodule Amorphos.HTTPSTokenConnectionTest do
     packet = %{
       "messages" => [message1, message2, message3, message4]
     }
-    Amorphos.HTTPSTokenConnection.handle_packet(%{host: "host1"}, packet)
+    Amorphos.HTTPSTokenConnection.handle_packet(%{"host" => "host1"}, packet)
     assert_receive message1
     refute_receive message2
     refute_receive message3
