@@ -23,6 +23,8 @@ defmodule Web.Router do
   scope "/", Web do
     pipe_through :browser
 
+    get "/.well-known/amorphos", PageController, :host_information
+
     get "/", PageController, :index
     resources "/users", UserController, only: [:new, :create]
 

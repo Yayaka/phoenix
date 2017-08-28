@@ -43,13 +43,11 @@ https_token = %{
   }
 }
 
-if Mix.env == :test do
-  config :amorphos, :host_information, %{
-    "ymp-version" => "0.1.0",
-    "connection-protocols" => [https_token],
-    "service_protocols" => [yayaka]
-  }
-end
+config :amorphos, :host_information, %{
+  "amorphos-version" => "0.1.0",
+  "connection-protocols" => [https_token],
+  "service-protocols" => [yayaka]
+}
 
 config :amorphos, HTTPSTokenConnection, https_token
 
