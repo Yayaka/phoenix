@@ -230,7 +230,9 @@ defmodule YayakaPresentation.User do
                               "yayaka", "identity", "authorize-service",
                               payload, "yayaka", "presentation")
     case Amorphos.MessageGateway.request(message) do
-      {:ok, _answer} -> :ok
+      {:ok, _answer} ->
+        YayakaUserCache.delete(user)
+        :ok
       _ -> :error
     end
   end
@@ -246,7 +248,9 @@ defmodule YayakaPresentation.User do
                               "yayaka", "identity", "revoke-service-authorization",
                               payload, "yayaka", "presentation")
     case Amorphos.MessageGateway.request(message) do
-      {:ok, _answer} -> :ok
+      {:ok, _answer} ->
+        YayakaUserCache.delete(user)
+        :ok
       _ -> :error
     end
   end

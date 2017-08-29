@@ -189,19 +189,6 @@ defmodule YayakaPresentation.UserTest do
         assert message["payload"]["user-id"] == user.id
         assert message["payload"]["user-name"] == new_user_name
         body = %{
-          "user-name" => new_user_name,
-          "suggestions" => suggestions}
-        answer = Utils.new_answer(message, body)
-        Amorphos.MessageGateway.push(answer)
-      end
-      assert {:ok, new_user_name, suggestions} ==
-        User.update_user_name(user, new_user_name)
-    end
-    with_mocks do
-      mock user.host, "update-user-name", fn message ->
-        assert message["payload"]["user-id"] == user.id
-        assert message["payload"]["user-name"] == new_user_name
-        body = %{
           "user-name" => new_user_name}
         answer = Utils.new_answer(message, body)
         Amorphos.MessageGateway.push(answer)
@@ -350,7 +337,13 @@ defmodule YayakaPresentation.UserTest do
         answer = Utils.new_answer(message, body)
         Amorphos.MessageGateway.push(answer)
       end
+      cache = %Yayaka.YayakaUser{
+        id: user.id, host: user.host, name: "name1",
+        attributes: [], authorized_services: []
+      }
+      Cachex.set(:yayaka_user, user, cache)
       assert :ok == User.authorize_service(user, service)
+      assert {:missing, nil} == Cachex.get(:yayaka_user, user)
     end
   end
 
@@ -366,7 +359,13 @@ defmodule YayakaPresentation.UserTest do
         answer = Utils.new_answer(message, body)
         Amorphos.MessageGateway.push(answer)
       end
+      cache = %Yayaka.YayakaUser{
+        id: user.id, host: user.host, name: "name1",
+        attributes: [], authorized_services: []
+      }
+      Cachex.set(:yayaka_user, user, cache)
       assert :ok == User.revoke_service_authorization(user, service)
+      assert {:missing, nil} == Cachex.get(:yayaka_user, user)
     end
   end
 
