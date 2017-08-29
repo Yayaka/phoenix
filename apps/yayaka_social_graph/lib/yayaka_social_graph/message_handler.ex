@@ -215,8 +215,8 @@ defmodule YayakaSocialGraph.MessageHandler do
         "protocol" => event.event["protocol"],
         "type" => event.event["type"],
         "body" => event.event["body"],
-        "sender-host" => event.sender.host,
-        "created-at" => Utils.to_datetime(timeline_event.inserted_at)}
+        "sender-host" => event.event["sender-host"],
+        "created-at" => event.event["created-at"]}
     end)
   end
 

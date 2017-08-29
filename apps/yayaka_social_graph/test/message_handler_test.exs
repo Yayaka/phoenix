@@ -263,6 +263,8 @@ defmodule YayakaSocialGraph.MessageHandlerTest do
   test "fetch-timeline" do
     user = %{host: "host1", id: "id1"}
     event = %{
+      "repository-host" => "repository-host1",
+      "event-id" => "id1",
       "identity-host" => "host1",
       "user-id" => "id1",
       "protocol" => "text",
@@ -273,15 +275,17 @@ defmodule YayakaSocialGraph.MessageHandlerTest do
             "type" => "plaintext",
             "body" => %{"text" => "aaa"}}
         ]
-      }}
+      },
+      "sender-host" => "sender-host1",
+      "created-at" => DateTime.utc_now() |> DateTime.to_iso8601()}
     event1 = %Event{
-      repository: %{host: "host1", service: :repository},
+      repository: %{host: "repository-host1", service: :repository},
       event_id: "id1",
       event: event,
       sender: %{host: @host, service: :social_graph}} |> DB.Repo.insert!()
     event2 = %Event{
-      repository: %{host: "host1", service: :repository},
-      event_id: "id2",
+      repository: %{host: "repository-host1", service: :repository},
+      event_id: "id1",
       event: event,
       sender: %{host: @host, service: :social_graph}} |> DB.Repo.insert!()
     timeline_event1 = %TimelineEvent{
@@ -302,37 +306,42 @@ defmodule YayakaSocialGraph.MessageHandlerTest do
     events = body["events"]
     assert length(events) == 3
     assert %{"repository-host" => event1.repository.host,
-      "event-id" => event1.event_id,
+      "repository-host" => event1.event["repository-host"],
+      "event-id" => event1.event["event-id"],
       "identity-host" => event1.event["identity-host"],
       "user-id" => event1.event["user-id"],
       "protocol" => event1.event["protocol"],
       "type" => event1.event["type"],
       "body" => event1.event["body"],
-      "sender-host" => event1.sender.host,
-      "created-at" => Utils.to_datetime(timeline_event1.inserted_at)} == Enum.at(events, 2)
+      "sender-host" => event1.event["sender-host"],
+      "created-at" => event1.event["created-at"]} == Enum.at(events, 2)
     assert %{"repository-host" => event2.repository.host,
-      "event-id" => event2.event_id,
+      "repository-host" => event2.event["repository-host"],
+      "event-id" => event2.event["event-id"],
       "identity-host" => event2.event["identity-host"],
       "user-id" => event2.event["user-id"],
       "protocol" => event2.event["protocol"],
       "type" => event2.event["type"],
       "body" => event2.event["body"],
-      "sender-host" => event2.sender.host,
-      "created-at" => Utils.to_datetime(timeline_event2.inserted_at)} == Enum.at(events, 1)
+      "sender-host" => event2.event["sender-host"],
+      "created-at" => event2.event["created-at"]} == Enum.at(events, 1)
     assert %{"repository-host" => event2.repository.host,
-      "event-id" => event2.event_id,
+      "repository-host" => event2.event["repository-host"],
+      "event-id" => event2.event["event-id"],
       "identity-host" => event2.event["identity-host"],
       "user-id" => event2.event["user-id"],
       "protocol" => event2.event["protocol"],
       "type" => event2.event["type"],
       "body" => event2.event["body"],
-      "sender-host" => event2.sender.host,
-      "created-at" => Utils.to_datetime(timeline_event3.inserted_at)} == Enum.at(events, 0)
+      "sender-host" => event2.event["sender-host"],
+      "created-at" => event2.event["created-at"]} == Enum.at(events, 0)
   end
 
   test "subscribe-timeline" do
     user = %{host: "host1", id: "id1"}
     event = %{
+      "repository-host" => "repository-host1",
+      "event-id" => "id1",
       "identity-host" => "host1",
       "user-id" => "id1",
       "protocol" => "text",
@@ -343,9 +352,11 @@ defmodule YayakaSocialGraph.MessageHandlerTest do
             "type" => "plaintext",
             "body" => %{"text" => "aaa"}}
         ]
-      }}
+      },
+      "sender-host" => "sender-host1",
+      "created-at" => DateTime.utc_now() |> DateTime.to_iso8601()}
     event1 = %Event{
-      repository: %{host: "host1", service: :repository},
+      repository: %{host: "repository-host1", service: :repository},
       event_id: "id1",
       event: event,
       sender: %{host: @host, service: :social_graph}} |> DB.Repo.insert!()
@@ -370,8 +381,8 @@ defmodule YayakaSocialGraph.MessageHandlerTest do
       "protocol" => event1.event["protocol"],
       "type" => event1.event["type"],
       "body" => event1.event["body"],
-      "sender-host" => event1.sender.host,
-      "created-at" => Utils.to_datetime(timeline_event1.inserted_at)} == Enum.at(events, 0)
+      "sender-host" => event1.event["sender-host"],
+      "created-at" => event1.event["created-at"]} == Enum.at(events, 0)
     query = from ts in TimelineSubscriber,
       where: ts.id == ^id,
       where: ts.user == ^%{host: user.host, id: user.id},
@@ -447,7 +458,7 @@ defmodule YayakaSocialGraph.MessageHandlerTest do
             "type" => "plaintext",
             "body" => %{"text" => "aaa"}}
         ]},
-      "sender-host" => @host,
+      "sender-host" => "sender-host1",
       "created-at" => DateTime.utc_now() |> DateTime.to_iso8601()}
     with_mocks do
       mock @host, "fetch-user", fn message ->
@@ -508,7 +519,7 @@ defmodule YayakaSocialGraph.MessageHandlerTest do
             "type" => "plaintext",
             "body" => %{"text" => "aaa"}}
         ]},
-      "sender-host" => @host,
+      "sender-host" => "sender-host1",
       "created-at" => DateTime.utc_now() |> DateTime.to_iso8601()}
     spawn_link(fn ->
       Amorphos.TestMessageHandler.register("fetch-user")
