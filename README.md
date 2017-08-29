@@ -2,12 +2,11 @@
 
 ## Environment Variables
 
-### YMP
-
-- *HOST*
+- *HOST*  
   The hostname
-
-### Secrets
-
-- *GUARDIAN_SECRET_KEY*
-  The secret key to sign the api tokens.
+- *DATABASE_URL*
+- *POOL_SIZE*
+- *GUARDIAN_SECRET_KEY*  
+  A secret key to sign the api tokens.
+- *SECRET_KEY_BASE*  
+  A secret key to sign cookies, tokens, etc.
