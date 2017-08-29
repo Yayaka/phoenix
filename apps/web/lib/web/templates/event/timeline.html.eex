@@ -23,23 +23,24 @@ user_id = if not is_nil(user), do: user.id, else: ""
   <% end %>
 </div>
 <% else %>
-<div class="ui segment">
-  <form id="event" class="ui form">
-    <div class="field">
-      <label for="repository_host">Repository host</label>
-      <input type="text" id="repository_host" name="repositor_host" value="<%= Amorphos.get_host() %>">
-    </div>
-    <div class="field">
-      <label for="protocol">Protocol</label>
-      <input type="text" id="protocol" name="protocol" value="yayaka">
-    </div>
-    <div class="field">
-      <label for="type">Type</label>
-      <input type="text" id="type" name="type" value="post">
-    </div>
-    <div class="field">
-      <label for="body">Body</label>
-      <textarea id="body" name="body" rows="11">
+  <%= if not is_nil(user) do %>
+    <div class="ui segment">
+      <form id="event" class="ui form">
+        <div class="field">
+          <label for="repository_host">Repository host</label>
+          <input type="text" id="repository_host" name="repositor_host" value="<%= Amorphos.get_host() %>">
+        </div>
+        <div class="field">
+          <label for="protocol">Protocol</label>
+          <input type="text" id="protocol" name="protocol" value="yayaka">
+        </div>
+        <div class="field">
+          <label for="type">Type</label>
+          <input type="text" id="type" name="type" value="post">
+        </div>
+        <div class="field">
+          <label for="body">Body</label>
+          <textarea id="body" name="body" rows="11">
 {
   "contents": [
     {
@@ -51,15 +52,16 @@ user_id = if not is_nil(user), do: user.id, else: ""
     }
   ]
 }
-      </textarea>
+          </textarea>
+        </div>
+        <%= submit "Submit", class: "ui primary button" %>
+      </form>
     </div>
-    <%= submit "Submit", class: "ui primary button" %>
-  </form>
-</div>
-<div id="timeline" class="ui list">
-</div>
-<script>
+  <% end %>
+  <div id="timeline" class="ui list">
+  </div>
+  <script>
 window.timelineToken = "<%= @token %>"
-</script>
-<script src="<%= static_path(@conn, "/js/app.js") %>"></script>
+  </script>
+  <script src="<%= static_path(@conn, "/js/app.js") %>"></script>
 <% end %>
