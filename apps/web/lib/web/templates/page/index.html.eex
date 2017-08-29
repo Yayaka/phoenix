@@ -1,0 +1,4 @@
+<div class="ui big list">
+  <a class="item" href="<%= event_path(@conn, :timeline) %>">Timeline</a>
+  <a class="item" href="<%= page_path(@conn, :host_information) %>">/.well-known/amorphos</a>
+</div>
