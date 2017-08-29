@@ -3,6 +3,7 @@ defmodule YayakaPresentation.User do
   alias YayakaPresentation.PresentationUser
   alias YayakaPresentation.UserLink
   alias Yayaka.YayakaUserCache
+  alias Yayaka.YayakaUser
   import Comeonin.Bcrypt, only: [hashpwsalt: 1, checkpw: 2, dummy_checkpw: 0]
   import Ecto.Query
 
@@ -314,6 +315,16 @@ defmodule YayakaPresentation.User do
     case Amorphos.MessageGateway.request(message) do
       {:ok, _answer} -> :ok
       _ -> :error
+    end
+  end
+
+  @spec ensure_authorized(user, Yayaka.Service.t) :: :ok | :error
+  def ensure_authorized(user, service) do
+    {:ok, yayaka_user} = YayakaUserCache.get_or_fetch(user)
+    if YayakaUser.authorizes?(yayaka_user, service) do
+      :ok
+    else
+      authorize_service(user, service)
     end
   end
 end

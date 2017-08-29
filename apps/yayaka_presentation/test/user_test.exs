@@ -437,4 +437,39 @@ defmodule YayakaPresentation.UserTest do
       assert :ok == User.unsubscribe(host1, user1, host2, user2)
     end
   end
+
+  test "ensure_authorized when not authorized" do
+    user = %{host: "host1", id: "id1"}
+    service = %{host: "host2", service: :social_graph}
+    with_mocks do
+      mock user.host, "authorize-service", fn message ->
+        assert message["payload"]["user-id"] == user.id
+        assert message["payload"]["host"] == service.host
+        assert message["payload"]["service"] == "social-graph"
+        body = %{}
+        answer = Utils.new_answer(message, body)
+        Amorphos.MessageGateway.push(answer)
+      end
+      cache = %Yayaka.YayakaUser{
+        id: user.id, host: user.host, name: "name1",
+        attributes: [], authorized_services: []
+      }
+      Cachex.set(:yayaka_user, user, cache)
+      assert :ok == User.ensure_authorized(user, service)
+      assert {:missing, nil} == Cachex.get(:yayaka_user, user)
+    end
+  end
+
+  test "ensure_authorized when authorized" do
+    user = %{host: "host1", id: "id1"}
+    service = %{host: "host2", service: :social_graph}
+    cache = %Yayaka.YayakaUser{
+      id: user.id, host: user.host, name: "name1",
+      attributes: [], authorized_services: [
+        %{"host" => service.host,
+          "service" => "social-graph",
+          "sender-host" => "host3"}]}
+    Cachex.set(:yayaka_user, user, cache)
+    assert :ok == User.ensure_authorized(user, service)
+  end
 end
