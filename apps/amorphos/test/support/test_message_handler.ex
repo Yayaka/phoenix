@@ -111,6 +111,12 @@ defmodule Amorphos.TestMessageHandler do
   # Callback
 
   @impl Amorphos.MessageHandler
+  def handle(%{"action" => "fail"} = action) do
+    :ok = :error
+    :ok
+  end
+
+  @impl Amorphos.MessageHandler
   def handle(message) do
     host = message["host"]
     action = message["action"]

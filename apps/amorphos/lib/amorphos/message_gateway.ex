@@ -35,6 +35,8 @@ defmodule Amorphos.MessageGateway do
           :error
       end
     end
+  rescue
+    _ -> :error
   end
 
   def request(message) do

@@ -1,5 +1,6 @@
 defmodule Amorphos.MessageGatewayTest do
   use DB.DataCase
+  import Amorphos.TestMessageHandler, only: [with_mocks: 1, mock: 3]
 
   test "push to local" do
     Amorphos.TestMessageHandler.register("amorphos-message-gateway-test-push")
@@ -157,5 +158,24 @@ defmodule Amorphos.MessageGatewayTest do
     {:ok, answer} = Amorphos.MessageGateway.request(message)
     assert answer == %{Amorphos.Message.new_answer(message, %{sum: 6}) |
       "id" => answer["id"]}
+  end
+
+  test "return error when fails" do
+    pid = self()
+    action = "fail"
+    message = %{"sender" => %{
+                  "host" => Amorphos.get_host(),
+                  "protocol" => "test",
+                  "service" => "service1"
+                },
+                "id" => "a",
+                "host" => Amorphos.get_host(),
+                "protocol" => "test",
+                "service" => "service2",
+                "action" => action,
+                "payload" => %{
+                  "list" => [1, 2, 3]
+                }}
+    assert :error == Amorphos.MessageGateway.push(message)
   end
 end
