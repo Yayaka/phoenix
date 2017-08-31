@@ -40,11 +40,13 @@ defmodule Web.YayakaUserController do
     actions = case {presentation_user, user} do
       {nil, _} ->
         [:check_user_name_availability,
-         :fetch_user, :fetch_user_by_name]
+         :fetch_user, :fetch_user_by_name,
+         :fetch_user_relations]
       {_, nil} ->
         [:create_user, :check_user_name_availability,
          :fetch_user, :fetch_user_by_name,
-         :authenticate_user]
+         :authenticate_user,
+         :fetch_user_relations]
       _ ->
         [:create_user, :check_user_name_availability,
          :update_user_name, :update_user_attributes,
@@ -226,9 +228,11 @@ defmodule Web.YayakaUserController do
   end
 
   def fetch_user_relations(conn, %{"params" => params}) do
-    user = get_yayaka_user!(conn)
-    %{"host" => host} = params
-    case User.fetch_relations(host, user) do
+    %{"social_graph_host" => social_graph_host,
+      "identity_host" => identity_host,
+      "user_id" => user_id} = params
+    user = %{host: identity_host, id: user_id}
+    case User.fetch_relations(social_graph_host, user) do
       {:ok, subscriptions, subscribers} ->
         subscriptions = Enum.map(subscriptions, fn {user, host} ->
           "#{user.id} @ #{user.host} on #{host}"

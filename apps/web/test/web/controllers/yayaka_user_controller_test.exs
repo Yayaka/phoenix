@@ -59,7 +59,7 @@ defmodule Web.YayakaUserControllerTest do
     refute response =~ "Authenticate user"
     refute response =~ "Authorize service"
     refute response =~ "Revoke service authorization"
-    refute response =~ "Fetch user relations"
+    assert response =~ "Fetch user relations"
     refute response =~ "Subscribe"
     refute response =~ "Unsubscribe"
   end
@@ -78,7 +78,7 @@ defmodule Web.YayakaUserControllerTest do
     assert response =~ "Authenticate user"
     refute response =~ "Authorize service"
     refute response =~ "Revoke service authorization"
-    refute response =~ "Fetch user relations"
+    assert response =~ "Fetch user relations"
     refute response =~ "Subscribe"
     refute response =~ "Unsubscribe"
   end
@@ -521,6 +521,7 @@ defmodule Web.YayakaUserControllerTest do
   # fetch-user-relations
 
   test "POST /yayaka/fetch-user-relations", %{conn: conn} do
+    user = %{host: "host", id: "id"}
     user1 = %{host: "host1", id: "id1"}
     host1 = "host3"
     user2 = %{host: "host2", id: "id2"}
@@ -528,8 +529,8 @@ defmodule Web.YayakaUserControllerTest do
     social_graph_host = "host5"
     with_mocks do
       mock social_graph_host, "fetch-user-relations", fn message ->
-        assert message["payload"]["identity-host"] == @user.host
-        assert message["payload"]["user-id"] == @user.id
+        assert message["payload"]["identity-host"] == user.host
+        assert message["payload"]["user-id"] == user.id
         body = %{
           "subscriptions" => [
             %{"identity-host" => user1.host,
@@ -544,7 +545,9 @@ defmodule Web.YayakaUserControllerTest do
         Amorphos.MessageGateway.push(answer)
       end
       params = %{
-        "host" => social_graph_host}
+        "social_graph_host" => social_graph_host,
+        "identity_host" => user.host,
+        "user_id" => user.id}
       conn = sign_up(conn)
              |> post yayaka_user_path(conn, :fetch_user_relations), params: params
       assert redirected_to(conn) == yayaka_user_path(conn, :index)
@@ -560,7 +563,9 @@ defmodule Web.YayakaUserControllerTest do
     import __MODULE__.Macros
     with_error "host1", "fetch-user-relations" do
       params = %{
-        "host" => "host1"}
+        "social_graph_host" => "host1",
+        "identity_host" => "host2",
+        "user_id" => "id1"}
       conn = sign_up(conn)
              |> post yayaka_user_path(conn, :fetch_user_relations), params: params
       assert redirected_to(conn) == yayaka_user_path(conn, :index)

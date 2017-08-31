@@ -210,8 +210,16 @@
     <h3>Fetch user relations</h3>
     <%= form_for @conn, yayaka_user_path(@conn, :fetch_user_relations), opts, fn f -> %>
       <div class="field">
-        <%= label f, :host, "Host" %>
-        <%= text_input f, :host, value: Amorphos.get_host() %>
+        <%= label f, :social_graph_host, "Social graph host" %>
+        <%= text_input f, :social_graph_host, value: Amorphos.get_host() %>
+      </div>
+      <div class="field">
+        <%= label f, :identity_host, "Identity host" %>
+        <%= text_input f, :identity_host, value: Amorphos.get_host() %>
+      </div>
+      <div class="field">
+        <%= label f, :user_id, "User ID" %>
+        <%= text_input f, :user_id %>
       </div>
       <%= submit "Fetch", class: "ui primary button" %>
     <% end %>
