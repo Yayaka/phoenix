@@ -1,0 +1,9 @@
+<script>
+window.userAttributes = <%= raw Poison.encode!(@attributes) %>
+window.currentUserAttributes = <%= raw Poison.encode!(@current) %>
+window.defaultValues = <%= raw Poison.encode!(@default_values) %>
+</script>
+<div id="forms"></div>
+<%= form_for @conn, yayaka_user_path(@conn, :update_user_attributes), [as: :params, method: :post, id: "form", class: "ui form"], fn f -> %>
+<% end %>
+<script src="<%= static_path(@conn, "/js/userAttributes.js") %>"></script>

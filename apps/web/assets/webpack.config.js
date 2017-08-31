@@ -2,6 +2,7 @@ var path = require("path");
 module.exports = {
   entry: {
     app: "./js/app",
+    userAttributes: "./js/userAttributes"
   },
   output: {
     path: path.join(__dirname, "../priv/static/js"),
@@ -15,7 +16,7 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['env']
+            presets: ['env', 'react']
           }
         }
       }

@@ -22,6 +22,9 @@
         </tbody>
       </table>
     <% end %>
+    <a class="ui primary fluid button" href="<%= yayaka_user_path(@conn, :user_attributes) %>">
+      Edit user attributes
+    </a>
     <p>Authorized services:</p>
     <%= if length(@user.authorized_services) != 0 do %>
       <table class="ui celled unstackable table">

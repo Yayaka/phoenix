@@ -49,6 +49,7 @@ defmodule Web.YayakaUserControllerTest do
     conn = conn
            |> get yayaka_user_path(conn, :index)
     response = html_response(conn, 200)
+    refute response =~ "Edit user attributes"
     refute response =~ "Create user"
     assert response =~ "Check user name availability"
     refute response =~ "Update user name"
@@ -68,6 +69,7 @@ defmodule Web.YayakaUserControllerTest do
     conn = sign_up(conn, false)
            |> get yayaka_user_path(conn, :index)
     response = html_response(conn, 200)
+    refute response =~ "Edit user attributes"
     assert response =~ "Create user"
     assert response =~ "Check user name availability"
     refute response =~ "Update user name"
@@ -87,6 +89,7 @@ defmodule Web.YayakaUserControllerTest do
     conn = sign_up(conn)
            |> get yayaka_user_path(conn, :index)
     response = html_response(conn, 200)
+    assert response =~ "Edit user attributes"
     assert response =~ "Create user"
     assert response =~ "Check user name availability"
     assert response =~ "Update user name"
@@ -252,6 +255,32 @@ defmodule Web.YayakaUserControllerTest do
       conn = sign_up(conn)
              |> post yayaka_user_path(conn, :update_user_attributes), params: params
       assert redirected_to(conn) == yayaka_user_path(conn, :index)
+      assert get_flash(conn, :info) =~ "updated"
+    end
+  end
+
+  test "POST /yayaka/update-user-attributes with path", %{conn: conn} do
+    attribute = %{
+      "protocol" => "yayaka",
+      "key" => "name",
+      "value" => %{"text" => "Name 2"}}
+    with_mocks do
+      mock @user.host, "update-user-attributes", fn message ->
+        assert message["payload"]["user-id"] == @user.id
+        assert message["payload"]["attributes"] == [attribute]
+        body = %{}
+        answer = Utils.new_answer(message, body)
+        Amorphos.MessageGateway.push(answer)
+      end
+      params = %{
+        "protocol" => attribute["protocol"],
+        "key" => attribute["key"],
+        "value" => Poison.encode!(attribute["value"]),
+        "path" => "/path"
+      }
+      conn = sign_up(conn)
+             |> post yayaka_user_path(conn, :update_user_attributes), params: params
+      assert redirected_to(conn) == "/path"
       assert get_flash(conn, :info) =~ "updated"
     end
   end

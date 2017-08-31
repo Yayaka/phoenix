@@ -37,6 +37,7 @@ defmodule Web.Router do
 
     scope "/yayaka" do
       get "/", YayakaUserController, :index
+      get "/user-attributes", YayakaUserController, :user_attributes
       post "/create-user", YayakaUserController, :create_user
       post "/check-user-name-availability", YayakaUserController, :check_user_name_availability
       post "/update-user-name", YayakaUserController, :update_user_name

@@ -2,9 +2,10 @@ defmodule Web.YayakaUserController do
   use Web, :controller
   alias YayakaPresentation.User
   alias Yayaka.YayakaUserCache
+  alias Yayaka.YayakaUser
 
   plug Guardian.Plug.EnsureAuthenticated, %{handler: __MODULE__} when action in [
-    :create_user, :update_user_name, :update_user_attributes,
+    :user_attributes, :create_user, :update_user_name, :update_user_attributes,
     :get_token, :authenticate_user,
     :authorize_service, :revoke_service_authorization,
     :fetch_user_relations, :subscribe, :unsubscribe]
@@ -16,10 +17,10 @@ defmodule Web.YayakaUserController do
     |> redirect(to: "/")
   end
 
-  defp ok(conn, message) do
+  defp ok(conn, message, path \\ nil) do
     conn
     |> put_flash(:info, message)
-    |> redirect(to: yayaka_user_path(conn, :index))
+    |> redirect(to: path || yayaka_user_path(conn, :index))
   end
 
   defp error(conn, message \\ "error") do
@@ -56,6 +57,17 @@ defmodule Web.YayakaUserController do
          :fetch_user_relations, :subscribe, :unsubscribe]
     end
     render conn, "index.html", actions: actions, user: cache
+  end
+
+  def user_attributes(conn, _params) do
+    user = get_yayaka_user!(conn)
+    {:ok, %YayakaUser{attributes: current}} = YayakaUserCache.get_or_fetch(user)
+    attributes = Application.get_env(:yayaka_identity, :user_attribute_types)
+    default_values = Application.get_env(:yayaka_identity, :user_attribute_default_values)
+    render(conn, "user_attributes.html",
+           attributes: attributes,
+           current: current,
+           default_values: default_values)
   end
 
   def create_user(conn, %{"params" => params}) do
@@ -113,6 +125,7 @@ defmodule Web.YayakaUserController do
     %{"protocol" => protocol,
       "key" => key,
       "value" => value} = params
+    path = Map.get(params, "path")
     value = Poison.decode!(value)
     attributes = [
       %{"protocol" => protocol,
@@ -122,7 +135,7 @@ defmodule Web.YayakaUserController do
       :ok ->
         ok(conn, """
         user attributes is updated.
-        """)
+        """, path)
       _ ->
         error(conn)
     end

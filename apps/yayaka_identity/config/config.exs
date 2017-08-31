@@ -3,6 +3,7 @@ use Mix.Config
 string = %{"type" => "string"}
 host = %{"type" => "string"}
 service = %{
+  "type" => "string",
   "enum" => ["presentation",
            "identity",
            "repository",
@@ -100,5 +101,32 @@ config :yayaka_identity, :user_attribute_types, %{
       "properties" => %{"text" => string},
       "additionalProperties" => false,
       "required" => ["text"]},
+  }
+}
+
+config :yayaka_identity, :user_attribute_default_values, %{
+  "yayaka" => %{
+    "service-labels" => %{
+      "labels" => []},
+    "subscriber-hosts" => %{
+      "hosts" => []},
+    "publisher-hosts" => %{
+      "hosts" => []},
+    "primary-publisher-host" => %{
+      "host" => nil},
+    "primary-repository-host" => %{
+      "host" => nil},
+    "primary-notification-host" => %{
+      "host" => nil},
+    "repository-subscriptions" => %{
+      "subscriptions" => []},
+    "biography" => %{
+      "text" => nil},
+    "links" => %{
+      "urls" => []},
+    "icon" => %{
+      "url" => nil},
+    "name" => %{
+      "text" => nil},
   }
 }
