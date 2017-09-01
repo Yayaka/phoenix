@@ -1,3 +1,4 @@
+import "../css/app.css" // omg
 import "phoenix_html"
 import {Socket} from "phoenix"
 
