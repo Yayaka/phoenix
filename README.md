@@ -1,1 +1,1 @@
-# MOVED TO [GITLAB](https://github.com/yayaka/phoenix)
+# MOVED TO [GITLAB](https://gitlab.com/yayaka/phoenix)
